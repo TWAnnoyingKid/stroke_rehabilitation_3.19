@@ -18,8 +18,6 @@ class RsstTestPage extends StatefulWidget {
 class _RsstTestPageState extends State<RsstTestPage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final _unfocusNode = FocusNode();
-  final audioPlayer = AudioCache();
-  final audioRecorder = AudioRecorder();
   final AudioPlayer _audioPlayer = AudioPlayer();//播放音檔
 
   bool _isPreparationPhase = true; // 準備階段
@@ -34,6 +32,7 @@ class _RsstTestPageState extends State<RsstTestPage> {
 
   Timer? _preparationTimer;
   Timer? _recordingTimer;
+  AudioRecorder audioRecorder = AudioRecorder(); // 錄音模組
 
   @override
   void initState() {
@@ -144,7 +143,7 @@ class _RsstTestPageState extends State<RsstTestPage> {
           _showFinalResult = true;
         });
 
-        // 轉到結果頁面
+        // 轉到結果頁面（音檔處理將在結果頁面自動進行）
         Future.delayed(Duration(milliseconds: 500), () {
           if (mounted) {
             Navigator.pushReplacement(

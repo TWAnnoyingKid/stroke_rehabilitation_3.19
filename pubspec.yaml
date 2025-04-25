@@ -28,7 +28,7 @@ dependencies:
   noise_meter: ^3.0.1
   permission_handler: ^10.0.0
   speech_to_text: ^6.1.1
-  fftea: ^1.0.0
+  fftea: ^1.5.0+1
   flutter_localization: ^0.1.10
   auto_size_text: 3.0.0
   cached_network_image: 3.3.1
@@ -74,6 +74,13 @@ dependencies:
   fl_chart: ^0.62.0
   pytorch_mobile: ^0.2.2
   image: ^4.0.15
+  uuid: ^4.5.1   # 生成唯一識別碼
+  fonnx:
+    git:
+      url: https://github.com/Telosnex/fonnx.git
+      ref: main
+  onnxruntime: ^1.4.1
+  record: ^4.4.4
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -81,6 +88,7 @@ dependencies:
   firebase_core: ^2.12.0
   firebase_messaging: ^14.6.0
   flutter_launcher_icons: 0.13.1
+  complex: ^0.8.0
 
 dependency_overrides:
   audio_streamer:
@@ -108,7 +116,7 @@ flutter:
     - assets/pose_audios/
     - assets/ml/
     - assets/model/
-    - assets/model/rsst_integrated_bi_1k2_wd_4_new_lite.pt
+    - assets/model/rsst_integrated_2k2_cnn_att2_2_ir9.onnx
 
 flutter_icons:
   android: "launcher_icon"

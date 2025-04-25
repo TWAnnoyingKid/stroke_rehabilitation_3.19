@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -7,6 +8,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'package:path/path.dart' show basename;
+import 'audio_processor.dart';
+import 'swallow_detector.dart'; // 引入吞嚥檢測器
 
 class RsstResultPage extends StatefulWidget {
   final int swallowCount;
@@ -27,7 +30,7 @@ class RsstResultPage extends StatefulWidget {
 class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final _unfocusNode = FocusNode();
-  final bool _uploadSuccess = true;
+  bool _uploadSuccess = false; // 設為實際上傳狀態
 
   // 音檔播放和波形圖相關變數
   TabController? _tabController;
@@ -43,24 +46,116 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
   String _audioFileDuration = "00:00";
   bool _isAudioSeekable = true;
 
+  // 音頻處理相關變數
+  bool _isProcessing = true; // 初始狀態為處理中
+  bool _isInferencing = false; // 是否正在進行模型推論
+  String? _denoisedFilePath;
+  List<AudioSegment> _audioSegments = [];
+  String? _processingErrorMessage;
+  int _originalSampleRate = 44100; // 原始採樣率
+
+  // 吞嚥檢測相關變數
+  SwallowDetector _swallowDetector = SwallowDetector();
+  int _detectedSwallowCount = 0; // 檢測到的吞嚥次數
+  List<double> _swallowTimes = []; // 吞嚥時間點
+  List<double> _swallowProbs = []; // 吞嚥概率
+
   @override
   void initState() {
     super.initState();
 
-    // 初始化標籤控制器
+    // 初始化標籤控制器 - 只有兩個標籤：結果概覽和音檔波形
     _tabController = TabController(length: 2, vsync: this);
 
-    // 如果有錄音文件，初始化音檔播放和波形圖
+    // 如果有錄音文件，自動進行處理
     if (widget.recordingPath != null) {
-      _loadAudioData();
-      _initAudioPlayer();
+      _processAudioFile();
+    } else {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
+  }
+
+  // 自動處理音檔
+  Future<void> _processAudioFile() async {
+    if (widget.recordingPath == null) return;
+
+    setState(() {
+      _isProcessing = true;
+      _processingErrorMessage = null;
+    });
+
+    try {
+      // 使用AudioProcessor處理音頻
+      final result = await AudioProcessor.processAudio(widget.recordingPath!);
+
+      if (mounted) {
+        setState(() {
+          _denoisedFilePath = result['denoisedFilePath'] as String;
+          _audioSegments = result['segments'] as List<AudioSegment>;
+          _sampleRate = result['adjustedSampleRate'] as int; // 使用調整後的採樣率
+          _originalSampleRate = result['originalSampleRate'] as int; // 保存原始採樣率
+          _isProcessing = false;
+          _isInferencing = true; // 進入推論階段
+        });
+
+        // 處理完成後，初始化音頻播放器（使用降噪後的音頻）
+        if (_denoisedFilePath != null) {
+          await _initAudioPlayer(_denoisedFilePath!);
+          await _loadAudioData(_denoisedFilePath!);
+        }
+
+        // 進行 ONNX 模型推論
+        try {
+          final inferenceResult = await _swallowDetector.detectSwallows(_audioSegments);
+
+          // 模擬上傳結果到服務器（實際應用中應該調用真實API）
+          if (!widget.isFromUpload) {
+            try {
+              // 這裡應該是實際的API調用
+              await Future.delayed(Duration(seconds: 1)); // 模擬網絡延遲
+              // 如果API調用成功，設置上傳成功狀態
+              setState(() {
+                _uploadSuccess = true; // 在實際應用中，這應該基於API響應
+              });
+            } catch (e) {
+              print('上傳結果失敗: $e');
+              setState(() {
+                _uploadSuccess = false;
+              });
+            }
+          }
+
+          setState(() {
+            _detectedSwallowCount = inferenceResult['swallowCount'];
+            _swallowTimes = inferenceResult['swallowTimes'];
+            _swallowProbs = inferenceResult['swallowProbs'];
+            _isInferencing = false;
+          });
+
+          print('檢測到 $_detectedSwallowCount 次吞嚥');
+        } catch (e) {
+          print('模型推論失敗: $e');
+          setState(() {
+            _isInferencing = false;
+            _processingErrorMessage = '模型推論失敗: $e';
+          });
+        }
+      }
+    } catch (e) {
+      print('處理音頻文件失敗: $e');
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _processingErrorMessage = '音頻處理失敗: $e';
+        });
+      }
     }
   }
 
   // 初始化音頻播放器
-  Future<void> _initAudioPlayer() async {
-    if (widget.recordingPath == null) return;
-
+  Future<void> _initAudioPlayer(String audioPath) async {
     setState(() {
       _isLoadingAudio = true;
     });
@@ -68,9 +163,9 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
     _audioPlayer = AudioPlayer();
     try {
       // 檢查檔案是否存在
-      File audioFile = File(widget.recordingPath!);
+      File audioFile = File(audioPath);
       if (!await audioFile.exists()) {
-        print('音頻檔案不存在: ${widget.recordingPath}');
+        print('音頻檔案不存在: $audioPath');
         setState(() {
           _isLoadingAudio = false;
         });
@@ -81,101 +176,123 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
       int fileSize = await audioFile.length();
       print('音頻檔案大小: ${(fileSize / 1024).toStringAsFixed(2)} KB');
 
-      // 新版API使用：
-      await _audioPlayer!.setSource(DeviceFileSource(widget.recordingPath!));
-      await _audioPlayer!.pause(); // 先暫停播放
-
-      // 新版API獲取總時長
-      final duration = await _audioPlayer!.getDuration();
-      if (duration != null) {
-        setState(() {
-          _totalDuration = duration;
-          _audioFileDuration = _formatDuration(_totalDuration);
-          print('音檔長度: $_audioFileDuration');
-        });
-      }
-
-      // 新版API使用事件監聽：
-      _audioPlayer!.onPositionChanged.listen((Duration position) {
-        setState(() {
-          _currentPosition = position;
-        });
-      });
-
-      // 新版API使用播放完成監聽：
-      _audioPlayer!.onPlayerComplete.listen((event) {
-        setState(() {
-          _isPlaying = false;
-          _currentPosition = Duration.zero;
-        });
-      });
-
-      // 檢查是否可以 seek
       try {
-        await _audioPlayer!.seek(Duration(milliseconds: 100));
-        await _audioPlayer!.seek(Duration.zero);
-        _isAudioSeekable = true;
+        // 設置音頻來源
+        await _audioPlayer!.setSource(DeviceFileSource(audioPath));
+        await _audioPlayer!.pause(); // 先暫停播放
+
+        // 獲取總時長
+        final duration = await _audioPlayer!.getDuration();
+        if (duration != null) {
+          setState(() {
+            _totalDuration = duration;
+            _audioFileDuration = _formatDuration(_totalDuration);
+            print('音檔長度: $_audioFileDuration');
+          });
+        } else {
+          print('無法獲取音頻長度，使用默認值');
+          setState(() {
+            _totalDuration = Duration.zero;
+            _audioFileDuration = "00:00";
+          });
+        }
+
+        // 設置位置更新監聽
+        _audioPlayer!.onPositionChanged.listen((Duration position) {
+          if (mounted) {
+            setState(() {
+              _currentPosition = position;
+            });
+          }
+        });
+
+        // 設置播放完成監聽
+        _audioPlayer!.onPlayerComplete.listen((event) {
+          if (mounted) {
+            setState(() {
+              _isPlaying = false;
+              _currentPosition = Duration.zero;
+            });
+          }
+        });
+
+        // 檢查是否可以 seek
+        try {
+          await _audioPlayer!.seek(Duration(milliseconds: 100));
+          await _audioPlayer!.seek(Duration.zero);
+          _isAudioSeekable = true;
+        } catch (e) {
+          print('檢查 seek 功能失敗: $e');
+          _isAudioSeekable = false;
+        }
       } catch (e) {
-        print('檢查 seek 功能失敗: $e');
-        _isAudioSeekable = false;
+        print('設置音頻源失敗: $e');
       }
 
-      setState(() {
-        _isLoadingAudio = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingAudio = false;
+        });
+      }
     } catch (e) {
       print('初始化音頻播放器失敗: $e');
-      setState(() {
-        _isLoadingAudio = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingAudio = false;
+        });
+      }
     }
   }
 
   // 載入音頻數據用於波形圖
-  Future<void> _loadAudioData() async {
-    if (widget.recordingPath == null) return;
-
+  Future<void> _loadAudioData(String audioPath) async {
     setState(() {
       _isLoadingAudio = true;
     });
 
     try {
-      final File audioFile = File(widget.recordingPath!);
+      final File audioFile = File(audioPath);
       if (await audioFile.exists()) {
         final bytes = await audioFile.readAsBytes();
-
-        // 解析 WAV 檔案並提取波形數據
-        _sampleRate = _getSampleRateFromWavHeader(bytes);
-
-        // 如果上傳的音檔採樣率不是44.1k，這裡我們仍然設定為44.1k
-        // 這只是為了顯示，實際上原始音檔不會被修改
-        if (_sampleRate != 44100) {
-          print('原始音檔採樣率: $_sampleRate Hz，已設定為標準採樣率: 44100 Hz');
-          _sampleRate = 44100;
+        if (bytes.length < 44) {
+          print('警告：音頻文件太短，無法解析頭部');
+          setState(() {
+            _isLoadingAudio = false;
+          });
+          return;
         }
 
-        _isSampleRateCorrect = true; // 強制設為正確，因為我們已經調整了採樣率顯示
-        print('音檔採樣率設定為：44100 Hz');
+        try {
+          // 解析 WAV 檔案並提取波形數據
+          _sampleRate = _getSampleRateFromWavHeader(bytes);
+          print('從音頻文件讀取到採樣率: $_sampleRate Hz');
 
-        _audioWaveform = _extractWaveform(bytes);
+          _audioWaveform = _extractWaveform(bytes);
 
-        // 如果數據太多，抽樣以減少點數
-        if (_audioWaveform.length > 3000) {
-          final samplingRate = (_audioWaveform.length / 3000).ceil();
-          _audioWaveform = _audioWaveform
-              .asMap()
-              .entries
-              .where((entry) => entry.key % samplingRate == 0)
-              .map((entry) => entry.value)
-              .toList();
+          // 如果數據太多，抽樣以減少點數
+          if (_audioWaveform.length > 3000) {
+            final samplingRate = (_audioWaveform.length / 3000).ceil();
+            _audioWaveform = _audioWaveform
+                .asMap()
+                .entries
+                .where((entry) => entry.key % samplingRate == 0)
+                .map((entry) => entry.value)
+                .toList();
+          }
+        } catch (e) {
+          print('解析音頻數據失敗: $e');
         }
+      } else {
+        print('音頻文件不存在: $audioPath');
       }
     } catch (e) {
       print('加載音頻數據失敗: $e');
     } finally {
-      setState(() {
-        _isLoadingAudio = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingAudio = false;
+        });
+      }
     }
   }
 
@@ -184,10 +301,15 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
     // WAV格式: 採樣率存儲在位置24-27
     if (fileBytes.length < 28) {
       print('警告：檔案可能不是有效的WAV檔案，太短無法讀取標頭');
-      return 0;
+      return 44100; // 使用默認採樣率
     }
 
-    return fileBytes[24] + (fileBytes[25] << 8) + (fileBytes[26] << 16) + (fileBytes[27] << 24);
+    try {
+      return fileBytes[24] + (fileBytes[25] << 8) + (fileBytes[26] << 16) + (fileBytes[27] << 24);
+    } catch (e) {
+      print('解析WAV頭部失敗: $e');
+      return 44100; // 發生錯誤時使用默認採樣率
+    }
   }
 
   // 從WAV檔案提取波形數據
@@ -198,21 +320,26 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
       return [];
     }
 
-    List<int> pcmBytes = fileBytes.sublist(headerSize);
+    try {
+      List<int> pcmBytes = fileBytes.sublist(headerSize);
 
-    // 假設是16位PCM數據（每個樣本2字節）
-    List<double> waveform = [];
-    for (int i = 0; i < pcmBytes.length; i += 2) {
-      if (i + 1 < pcmBytes.length) {
-        // 將兩個字節合併為16位有符號整數，然後標準化到 -1 到 1
-        int sample = pcmBytes[i] | (pcmBytes[i + 1] << 8);
-        // 處理有符號數
-        if (sample > 32767) sample -= 65536;
-        waveform.add(sample / 32768.0);
+      // 假設是16位PCM數據（每個樣本2字節）
+      List<double> waveform = [];
+      for (int i = 0; i < pcmBytes.length; i += 2) {
+        if (i + 1 < pcmBytes.length) {
+          // 將兩個字節合併為16位有符號整數，然後標準化到 -1 到 1
+          int sample = pcmBytes[i] | (pcmBytes[i + 1] << 8);
+          // 處理有符號數
+          if (sample > 32767) sample -= 65536;
+          waveform.add(sample / 32768.0);
+        }
       }
-    }
 
-    return waveform;
+      return waveform;
+    } catch (e) {
+      print('提取波形數據失敗: $e');
+      return [];
+    }
   }
 
   // 切換播放/暫停
@@ -241,11 +368,15 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
     _positionTimer?.cancel();
     _positionTimer = Timer.periodic(Duration(milliseconds: 200), (timer) async {
       // 新版API獲取當前位置
-      final position = await _audioPlayer!.getCurrentPosition();
-      if (position != null) {
-        setState(() {
-          _currentPosition = position;
-        });
+      try {
+        final position = await _audioPlayer?.getCurrentPosition();
+        if (position != null && mounted) {
+          setState(() {
+            _currentPosition = position;
+          });
+        }
+      } catch (e) {
+        print('獲取播放位置失敗: $e');
       }
     });
   }
@@ -258,8 +389,13 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
 
   // 跳轉到指定位置
   void _seekTo(double value) async {
-    if (!_isAudioSeekable) {
+    if (!_isAudioSeekable || _audioPlayer == null) {
       print('該音檔不支援進度條拖動功能');
+      return;
+    }
+
+    if (_totalDuration.inMilliseconds <= 0) {
+      print('音頻長度無效，無法進行定位');
       return;
     }
 
@@ -285,9 +421,20 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
   @override
   void dispose() {
     _tabController?.dispose();
-    _audioPlayer?.dispose();
+
+    // 確保釋放所有播放器資源
+    try {
+      _audioPlayer?.dispose();
+    } catch (e) {
+      print('釋放音頻播放器資源失敗: $e');
+    }
+
     _positionTimer?.cancel();
     _unfocusNode.dispose();
+
+    // 釋放 SwallowDetector 資源
+    _swallowDetector.dispose();
+
     super.dispose();
   }
 
@@ -322,11 +469,94 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
             ],
           ),
         ),
-        body: TabBarView(
+        body: (_isProcessing || _isInferencing)
+            ? _buildProcessingView()
+            : TabBarView(
           controller: _tabController,
           children: [
             _buildResultOverview(),
             _buildWaveformTab(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 處理中的視圖
+  Widget _buildProcessingView() {
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 5,
+              color: Colors.black.withOpacity(0.2),
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2E5AAC)),
+            ),
+            SizedBox(height: 20),
+            Text(
+              _isInferencing ? '正在進行吞嚥次數推論...' : '正在處理音檔...',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E5AAC),
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              _isInferencing
+                  ? '使用 ONNX 模型分析吞嚥次數，請稍候...'
+                  : '正在應用降噪和分割處理，請稍候...',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            if (_processingErrorMessage != null) ...[
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red),
+                    SizedBox(height: 5),
+                    Text(
+                      _processingErrorMessage!,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.red.shade800),
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade700,
+                      ),
+                      child: Text('返回', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -400,7 +630,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ),
                       child: Center(
                         child: Text(
-                          '${widget.swallowCount}',
+                          '$_detectedSwallowCount',  // 使用檢測到的實際數值
                           style: FlutterFlowTheme.of(context).displayLarge.override(
                             fontFamily: 'Poppins',
                             color: Colors.white,
@@ -431,10 +661,38 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ],
                     ),
                   ] else ...[
+                    const SizedBox(height: 10),
+                    AutoSizeText(
+                      '檢測到的吞嚥次數',
+                      style: FlutterFlowTheme.of(context).titleMedium.override(
+                        fontFamily: 'Poppins',
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      width: 150,
+                      height: 150,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2E5AAC),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '$_detectedSwallowCount',  // 顯示檢測到的實際值
+                          style: FlutterFlowTheme.of(context).displayLarge.override(
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            fontSize: 70,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     const Icon(
                       Icons.audio_file,
-                      size: 60,
+                      size: 40,
                       color: Color(0xFF2E5AAC),
                     ),
                     const SizedBox(height: 10),
@@ -448,9 +706,109 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                     ),
                   ],
 
+                  // 處理完成的提示
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.green),
+                          SizedBox(height: 5),
+                          Text(
+                            '音檔已經過降噪處理及分析完成',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 顯示吞嚥時間點（如果有檢測到）
+                  if (_swallowTimes.isNotEmpty) ...[
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '檢測到的吞嚥時間點',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2E5AAC),
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              height: 150,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: math.min(10, _swallowTimes.length),
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '吞嚥 #${index + 1}:',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${_swallowTimes[index].toStringAsFixed(2)}秒',
+                                          style: TextStyle(
+                                            color: Color(0xFF2E5AAC),
+                                          ),
+                                        ),
+                                        Text(
+                                          '概率: ${(_swallowProbs[index] * 100).toStringAsFixed(1)}%',
+                                          style: TextStyle(
+                                            color: Colors.green.shade800,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            if (_swallowTimes.length > 10)
+                              Text(
+                                '... 以及 ${_swallowTimes.length - 10} 個更多時間點',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+
                   // 顯示音檔相關資訊
-                  if (widget.recordingPath != null) ...[
-                    const SizedBox(height: 20),
+                  if (_denoisedFilePath != null || widget.recordingPath != null) ...[
+                    const SizedBox(height: 10),
                     Divider(color: Colors.grey.shade300),
                     const SizedBox(height: 10),
                     Text(
@@ -477,7 +835,39 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '採樣率:',
+                                '原始採樣率:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '$_originalSampleRate Hz',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: _originalSampleRate == 44100 ? Colors.green.shade800 : Colors.orange.shade800,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Icon(
+                                    _originalSampleRate == 44100 ? Icons.check_circle : Icons.info_outline,
+                                    color: _originalSampleRate == 44100 ? Colors.green.shade800 : Colors.orange.shade800,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+
+                          // 調整後採樣率
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '調整後採樣率:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -489,13 +879,13 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                                     '$_sampleRate Hz',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: _isSampleRateCorrect ? Colors.green.shade800 : Colors.red.shade800,
+                                      color: Colors.green.shade800,
                                     ),
                                   ),
                                   SizedBox(width: 5),
                                   Icon(
-                                    _isSampleRateCorrect ? Icons.check_circle : Icons.error,
-                                    color: _isSampleRateCorrect ? Colors.green.shade800 : Colors.red.shade800,
+                                    Icons.check_circle,
+                                    color: Colors.green.shade800,
                                     size: 16,
                                   ),
                                 ],
@@ -526,9 +916,32 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                           ),
                           SizedBox(height: 8),
 
+                          // 處理結果
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '分割片段數:',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                '${_audioSegments.length}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue.shade800,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+
                           // 檔案名稱
                           Text(
-                            '檔案名稱:',
+                            '原始檔案:',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
@@ -611,7 +1024,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '原始音頻波形',
+                    '降噪後音頻波形',
                     style: FlutterFlowTheme.of(context).titleMedium.override(
                       fontFamily: 'Poppins',
                       color: const Color(0xFF2E5AAC),
@@ -620,25 +1033,25 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                     ),
                   ),
                   const SizedBox(height: 5),
-                  if (!_isSampleRateCorrect && _sampleRate > 0)
+                  if (_originalSampleRate != 44100)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: Colors.orange.shade50,
                           borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: Colors.red.shade200),
+                          border: Border.all(color: Colors.orange.shade200),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 16),
+                            Icon(Icons.info_outline, color: Colors.orange, size: 16),
                             SizedBox(width: 5),
                             Expanded(
                               child: Text(
-                                '音檔採樣率不是標準的44.1kHz，可能影響分析結果',
+                                '原始採樣率 $_originalSampleRate Hz 已自動轉換為標準的 44.1kHz',
                                 style: TextStyle(
-                                  color: Colors.red.shade800,
+                                  color: Colors.orange.shade800,
                                   fontSize: 12,
                                 ),
                               ),
@@ -648,6 +1061,33 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ),
                     ),
                   const SizedBox(height: 10),
+                  // 降噪提示
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.audio_file, color: Colors.green, size: 16),
+                          SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              '此音檔已經過巴特沃斯濾波與頻譜閘控降噪處理',
+                              style: TextStyle(
+                                color: Colors.green.shade800,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   // 音檔長度和播放時長顯示
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -668,8 +1108,37 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                     ),
                   ),
 
+                  // 標記吞嚥時間點
+                  if (_swallowTimes.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.water_drop, color: Colors.red, size: 16),
+                            SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                '在波形上標記了 ${_swallowTimes.length} 個吞嚥點',
+                                style: TextStyle(
+                                  color: Colors.red.shade800,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   // 音頻播放控制
-                  if (widget.recordingPath != null && _audioPlayer != null)
+                  if (_denoisedFilePath != null && _audioPlayer != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 20),
                       child: Column(
@@ -747,7 +1216,23 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                   else if (_audioWaveform.isEmpty)
                     const Padding(
                       padding: EdgeInsets.all(20),
-                      child: Text('無法載入音頻波形數據'),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange,
+                            size: 40,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            '無法載入音頻波形數據',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     )
                   else
                     Container(
@@ -769,9 +1254,19 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
   Widget _buildWaveformChart() {
     if (_audioWaveform.isEmpty) {
       return Center(
-        child: Text(
-          '無法載入音頻波形數據',
-          style: FlutterFlowTheme.of(context).bodyMedium,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 40),
+            SizedBox(height: 10),
+            Text(
+              '無法載入音頻波形數據',
+              style: FlutterFlowTheme.of(context).bodyMedium.copyWith(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -875,6 +1370,35 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
             ),
           ),
         ],
+        // 標記吞嚥時間點
+        extraLinesData: ExtraLinesData(
+          verticalLines: _swallowTimes.map((time) {
+            // 將時間（秒）轉換為波形圖x坐標
+            double x = time * _sampleRate;
+            // 限制在波形範圍內
+            if (x >= 0 && x < _audioWaveform.length) {
+              return VerticalLine(
+                x: x,
+                color: Colors.red.withOpacity(0.7),
+                strokeWidth: 2,
+                label: VerticalLineLabel(
+                  show: true,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    backgroundColor: Colors.white.withOpacity(0.7),
+                  ),
+                  alignment: Alignment.topCenter,
+                  labelResolver: (line) => '吞嚥',
+                ),
+              );
+            } else {
+              // 如果超出範圍，返回null
+              return null;
+            }
+          }).whereType<VerticalLine>().toList(),
+        ),
       ),
     );
   }

@@ -96,27 +96,57 @@ class _RsstIntroPageState extends State<RsstIntroPage> {
         File file = File(result.files.single.path!);
         print('上傳檔案路徑: ${file.path}');
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RsstResultPage(
-              swallowCount: 0,
-              recordingPath: file.path,
-              isFromUpload: true,
-            ),
-          ),
-        );
+        // 顯示上傳中提示對話框
+        if (mounted) {
+          // 先顯示一個進度提示對話框
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 15),
+                    Text('音檔上傳中，即將進行處理與吞嚥分析...'),
+                  ],
+                ),
+              );
+            },
+          );
+
+          // 延遲一下確保對話框顯示，然後導航到結果頁面
+          Future.delayed(Duration(milliseconds: 800), () {
+            // 關閉對話框
+            Navigator.of(context).pop();
+
+            // 導航到結果頁面，音檔處理會在結果頁面自動進行
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RsstResultPage(
+                  swallowCount: 0, // 初始設為0，會在結果頁面透過模型推論更新
+                  recordingPath: file.path,
+                  isFromUpload: true, // 標記為上傳模式，這樣會顯示推論結果
+                ),
+              ),
+            );
+          });
+        }
+      } else {
+        // 用戶取消了選擇
+        setState(() => _isUploading = false);
       }
     } catch (e) {
       print('上傳音檔時出錯: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('處理音檔時出錯: $e'), backgroundColor: Colors.red),
-      );
-    } finally {
       if (mounted) {
-        setState(() {
-          _isUploading = false;
-        });
+        // 如果對話框正在顯示，先關閉
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('處理音檔時出錯: $e'), backgroundColor: Colors.red),
+        );
+        setState(() => _isUploading = false);
       }
     }
   }
@@ -431,7 +461,7 @@ class _RsstIntroPageState extends State<RsstIntroPage> {
                     ),
                   ).animate().fade(duration: 500.ms, delay: 200.ms),
 
-                  // 處理中的指示器
+                  // 上傳進度指示器
                   if (_isUploading)
                     Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 30),
