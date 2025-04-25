@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_sound/flutter_sound.dart';
+import 'package:record/record.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AudioRecorder {
-  FlutterSoundRecorder? _audioRecorder;
+  final Record _recorder = Record();
   bool _isRecorderInitialized = false;
   bool _isRecording = false;
   String? _recordingPath;
-  int _sampleRate = 44100;
+  final int _sampleRate = 44100;
   Completer<void>? _initCompleter;
 
   // 建構函數
@@ -34,8 +34,7 @@ class AudioRecorder {
         return _initCompleter!.future;
       }
 
-      _audioRecorder = FlutterSoundRecorder();
-      print('創建 FlutterSoundRecorder 實例');
+      print('初始化錄音器...');
 
       // 請求錄音權限
       var status = await Permission.microphone.request();
@@ -44,11 +43,14 @@ class AudioRecorder {
       }
       print('麥克風權限已授予');
 
-      // 開啟錄音機
-      await _audioRecorder!.openRecorder();
-      print('錄音機已開啟');
+      // 檢查是否可以錄音
+      bool canRecord = await _recorder.hasPermission();
+      if (!canRecord) {
+        throw RecordingPermissionException('無法獲得錄音權限');
+      }
 
       _isRecorderInitialized = true;
+      print('錄音機初始化完成');
       _initCompleter!.complete();
     } catch (e) {
       print('初始化錄音機失敗: $e');
@@ -80,13 +82,31 @@ class AudioRecorder {
     print('檔案將保存至: $_recordingPath');
 
     try {
+      // 再次檢查麥克風權限
+      var status = await Permission.microphone.status;
+      if (!status.isGranted) {
+        throw RecordingPermissionException('麥克風權限未授予或已被撤銷');
+      }
+
+      // 確保目錄存在
+      final dir = Directory(directory.path);
+      if (!await dir.exists()) {
+        await dir.create(recursive: true);
+      }
+
       // 開始錄音
-      await _audioRecorder!.startRecorder(
-        toFile: _recordingPath,
-        codec: Codec.pcm16WAV,
-        sampleRate: _sampleRate,
-        numChannels: 1, // 單聲道
+      await _recorder.start(
+        path: _recordingPath,
+        encoder: AudioEncoder.wav,  // WAV格式
+        bitRate: 16 * 1000,         // 16 kbps
+        samplingRate: _sampleRate,  // 44.1 kHz
+        numChannels: 1,             // 單聲道
       );
+
+      // 設置音量監聽器
+      _recorder.onAmplitudeChanged(const Duration(milliseconds: 300)).listen((amp) {
+        print('錄音中，音量: ${amp.current} dB, 峰值: ${amp.max} dB');
+      });
 
       print('錄音開始');
       _isRecording = true;
@@ -104,8 +124,30 @@ class AudioRecorder {
 
     try {
       print('正在停止錄音...');
-      await _audioRecorder!.stopRecorder();
+      await _recorder.stop();
       _isRecording = false;
+
+      // 驗證錄音檔案
+      if (_recordingPath != null) {
+        File audioFile = File(_recordingPath!);
+        if (await audioFile.exists()) {
+          int fileSize = await audioFile.length();
+          print('錄音完成，檔案大小: ${fileSize} 位元組');
+
+          // 檢查檔案大小是否異常（小於1KB可能表示錄音失敗）
+          if (fileSize < 1024) {
+            print('警告：錄音檔案大小異常小，可能錄音失敗');
+            if (fileSize < 100) {
+              print('嚴重錯誤：錄音檔案實際上為空');
+              return null;
+            }
+          }
+        } else {
+          print('錄音檔案不存在: $_recordingPath');
+          return null;
+        }
+      }
+
       print('錄音完成，檔案儲存於: $_recordingPath');
       return _recordingPath;
     } catch (e) {
@@ -123,8 +165,7 @@ class AudioRecorder {
       }
 
       if (_isRecorderInitialized) {
-        await _audioRecorder!.closeRecorder();
-        _audioRecorder = null;
+        _recorder.dispose();
         _isRecorderInitialized = false;
         print('錄音機資源已釋放');
       }
