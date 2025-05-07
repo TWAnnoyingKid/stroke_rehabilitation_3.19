@@ -15,6 +15,7 @@ import '../painters/pose_painter.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class headneck_bend extends StatefulWidget {
   @override
@@ -316,7 +317,36 @@ class Detector_headneck_bend {
   String mindText = "請將臉部拍攝於畫面內\n並維持鏡頭穩定\n準備完成請按「Start」";
   final AudioCache player = AudioCache();
   final AudioPlayer _audioPlayer = AudioPlayer();//播放音檔
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
   void startd(){//倒數計時
     int counter = 5;
     buttom_false = false;
@@ -449,7 +479,9 @@ class Detector_headneck_bend {
 
   @override
   Future<void> sounder(int counter) async {
-    await _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+    await _loadLanguagePreference(); // 確保獲取最新設定
+    String audioPath = '${getAudioPath()}/${counter}.${getAudioDataForm()}';
+    await _audioPlayer.play(AssetSource(audioPath));
   }
 
 }

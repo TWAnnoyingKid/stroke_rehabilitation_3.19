@@ -7,6 +7,7 @@ import '../../main.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// **第一個畫面：讓使用者選擇 PA、TA、KA**
 class speech extends StatefulWidget {

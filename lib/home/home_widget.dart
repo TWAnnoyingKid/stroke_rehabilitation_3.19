@@ -306,7 +306,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      context.pushNamed('setting');
+                      context.pushNamed('settings_menu');
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.max,

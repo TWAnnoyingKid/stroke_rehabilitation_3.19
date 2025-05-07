@@ -24,6 +24,7 @@ class _RsstTestPageState extends State<RsstTestPage> {
   bool _isRecording = false; // 正在錄音
   bool _isProcessing = false; // 正在處理
   bool _showFinalResult = false; // 顯示最終結果
+  bool _earlyRecordingStarted = false; // 提前開始錄音的標記
 
   int _preparationCounter = 5; // 準備倒數計時
   int _recordingCounter = 30; // 錄音倒數計時
@@ -60,19 +61,41 @@ class _RsstTestPageState extends State<RsstTestPage> {
         _preparationCounter--;
       });
 
+      // 當倒數到2秒時開始錄音，但倒數計時繼續
+      if (_preparationCounter == 2 && !_earlyRecordingStarted) {
+        _earlyRecordingStarted = true;
+        _startRecordingEarly();
+      }
+
+      // 當倒數到0時，切換到錄音界面
       if (_preparationCounter <= 0) {
         timer.cancel();
-        _startRecording();
+        _switchToRecordingPhase();
       }
     });
   }
 
-  void _startRecording() async {
+  // 提前開始錄音，但保持在準備階段界面
+  void _startRecordingEarly() async {
+    // 初始化錄音機
+    try {
+      await audioRecorder.init();
+      await audioRecorder.startRecording();
+      print('成功提前開始錄音，當前倒數：$_preparationCounter 秒');
+    } catch (e) {
+      print('提前錄音初始化失敗: $e');
+      _showErrorDialog('錄音初始化失敗，請檢查麥克風權限。');
+      return;
+    }
+  }
+
+  // 切換到錄音界面
+  void _switchToRecordingPhase() {
     if (!mounted) return;
 
     // 播放提示音
     try {
-      await _audioPlayer.play(AssetSource('audios/start_beep.mp3'));
+      _audioPlayer.play(AssetSource('audios/start_beep.mp3'));
     } catch (e) {
       print('無法播放開始提示音: $e');
     }
@@ -82,6 +105,18 @@ class _RsstTestPageState extends State<RsstTestPage> {
       _isRecording = true;
       _recordingCounter = 30; // 確保重設為30秒
     });
+
+    // 如果尚未開始錄音，才初始化錄音
+    if (!_earlyRecordingStarted) {
+      _startRecording();
+    } else {
+      // 已經在錄音了，只需啟動倒數計時
+      _startRecordingTimer();
+    }
+  }
+
+  void _startRecording() async {
+    if (!mounted) return;
 
     // 開始錄音
     try {
@@ -94,6 +129,11 @@ class _RsstTestPageState extends State<RsstTestPage> {
       return;
     }
 
+    _startRecordingTimer();
+  }
+
+  // 開始錄音倒數計時器
+  void _startRecordingTimer() {
     // 開始錄音倒數計時
     _recordingTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!mounted) {
@@ -120,7 +160,7 @@ class _RsstTestPageState extends State<RsstTestPage> {
 
     // 播放結束提示音
     try {
-      await _audioPlayer.play(AssetSource('audios/end_beep.mp3'));
+      await _audioPlayer.play(AssetSource('audios/start_beep.mp3'));
     } catch (e) {
       print('無法播放結束提示音: $e');
     }
@@ -194,7 +234,8 @@ class _RsstTestPageState extends State<RsstTestPage> {
     if (_preparationTimer != null && _preparationTimer!.isActive) {
       _preparationTimer!.cancel();
     }
-    if (_isRecording && _recordingTimer != null && _recordingTimer!.isActive) {
+    if ((_isRecording || _earlyRecordingStarted) &&
+        _recordingTimer != null && _recordingTimer!.isActive) {
       _recordingTimer!.cancel();
       audioRecorder.stopRecording();
     }
@@ -288,17 +329,21 @@ class _RsstTestPageState extends State<RsstTestPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               AutoSizeText(
-                '準備開始測驗',
+                _earlyRecordingStarted
+                    ? '錄音已開始！'
+                    : '準備開始測驗',
                 style: FlutterFlowTheme.of(context).titleLarge.override(
                   fontFamily: 'Poppins',
-                  color: Color(0xFFC50D1C),
+                  color: _earlyRecordingStarted ? Colors.red : Color(0xFFC50D1C),
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 15),
               AutoSizeText(
-                '請將手機放在頸部右側\n準備就緒後將在倒數結束時開始錄音',
+                _earlyRecordingStarted
+                    ? '錄音已開始！請將手機保持在頸部右側\n倒數結束後測驗繼續進行'
+                    : '請將手機放在頸部右側\n準備就緒後將在倒數結束時開始錄音',
                 textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                   fontFamily: 'Poppins',
@@ -308,6 +353,41 @@ class _RsstTestPageState extends State<RsstTestPage> {
             ],
           ),
         ).animate().fade(duration: 400.ms),
+
+        // 提前錄音的指示器
+        if (_earlyRecordingStarted)
+          Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.8),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.mic,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    '錄音中',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ).animate(onPlay: (controller) => controller.repeat())
+              .fadeIn(duration: 500.ms)
+              .fadeOut(duration: 500.ms)
+              .then()
       ],
     );
   }

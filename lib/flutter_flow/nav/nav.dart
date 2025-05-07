@@ -43,6 +43,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => SettingWidget(),
         ),
         FFRoute(
+          name: 'settings_menu',
+          path: 'settings_menu',
+          builder: (context, params) => SettingsMenuWidget(),
+        ),
+        FFRoute(
+          name: 'preference_settings',
+          path: 'preference_settings',
+          builder: (context, params) => PreferenceSettingsWidget(),
+        ),
+        FFRoute(
           name: 'need',
           path: 'need',
           builder: (context, params) => NeedWidget(),

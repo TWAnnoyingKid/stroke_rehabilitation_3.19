@@ -16,6 +16,8 @@ import 'camera_view.dart';
 import 'painters/label_detector_painter.dart';
 import 'package:audioplayers/audioplayers.dart';//播放音檔
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 //
 //                       _oo0oo_
 //                      o8888888o
@@ -438,9 +440,38 @@ class Detector_Puff {
   String faceImg    = 'assets/images/non.png'; //目標特徵
   final AudioCache player = AudioCache();
   final AudioPlayer _audioPlayer = AudioPlayer();//撥放音檔
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
 
   void FaceDetector() {
+    _loadLanguagePreference();
     //偵測判定
     if (this.StartedDetector) {
       DetectorED = true;
@@ -533,11 +564,17 @@ class Detector_Puff {
     );
   }
   void sounder(int counter){
+    _loadLanguagePreference();
     if (counter == 999 && sound){
-      _audioPlayer.play(AssetSource('face_audios/keepPuff.mp3'));
+      if (getAudioPath() == "pose_audios"){
+        _audioPlayer.play(AssetSource('audios/keepPuff.mp3'));
+      }else{
+        _audioPlayer.play(AssetSource('audios/taigi_keepPuff.wav'));
+      }
       sound = false;
     }else{
-      _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+      String audioPath = '${getAudioPath()}/${counter}.${getAudioDataForm()}';
+      _audioPlayer.play(AssetSource(audioPath));
     }
   }
 
@@ -556,7 +593,7 @@ Future<void> endout13() async {
     "action": FFAppState().mouth.toString(), //動作
     "degree": "初階",
     "parts": "吞嚥",
-    "times": "1", //動作
+    "times": "1", //動作次數 會累加
     "coin_add": "5",
   });
   if (responce.statusCode == 200) {

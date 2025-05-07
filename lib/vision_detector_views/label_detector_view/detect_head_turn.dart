@@ -15,6 +15,7 @@ import '../painters/pose_painter.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class head_turn extends StatefulWidget {
   @override
@@ -351,7 +352,36 @@ class Detector_head_turn {
   Timer? reminderTimer; // 用於定時提示
   Timer? reminderTimer2; // 用於定時提示
   bool _isDisposed = false;
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
 
 
   void startd(){//倒數計時
@@ -516,33 +546,29 @@ class Detector_head_turn {
 
   void sounder(int counter){
     if (_isDisposed) return;
+    _loadLanguagePreference();
     if(counter == 999 && sound){
       if (right_side && startdDetector) {
-        _audioPlayer.play(AssetSource('pose_audios/upper/TurnHead_right.mp3'));
+        _audioPlayer.play(AssetSource('${getAudioPath()}/upper/TurnHead_right.${getAudioDataForm()}'));
         sound = false;
         startReminder();
       }else if(!right_side && startdDetector){
-        _audioPlayer.play(AssetSource('pose_audios/upper/TurnHead_left.mp3'));
+        _audioPlayer.play(AssetSource('${getAudioPath()}//upper/TurnHead_left.${getAudioDataForm()}'));
         sound = false;
         startReminder();
       }
     }else
-      _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+      _audioPlayer.play(AssetSource('${getAudioPath()}/${counter}.${getAudioDataForm()}'));
   }
 
 
   Future<void> posesounder(bool BOO) async {
     await Future.delayed(Duration(seconds: 1));
     if (BOO) {
-      _audioPlayer.play(AssetSource('pose_audios/done.mp3'));
+      await _loadLanguagePreference(); // 確保獲取最新設定
+      String audioPath = '${getAudioPath()}/done.${getAudioDataForm()}';
+      await _audioPlayer.play(AssetSource(audioPath));
     }
-    // if (startdDetector) {
-    //   if (right_side) {
-    //     player.play('pose_audios/upper/TurnHead_right.mp3');
-    //   } else {
-    //     player.play('pose_audios/upper/TurnHead_left.mp3');
-    //   }
-    // }
   }
   void startReminder() {
     // 确保之前的定时器被取消

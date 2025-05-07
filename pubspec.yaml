@@ -114,6 +114,9 @@ flutter:
     - assets/pose_audios/upper/
     - assets/pose_audios/lower/
     - assets/pose_audios/
+    - assets/taigi_pose_audios/upper/
+    - assets/taigi_pose_audios/lower/
+    - assets/taigi_pose_audios/
     - assets/ml/
     - assets/model/
     - assets/model/rsst_integrated_2k2_cnn_att2_2_ir9.onnx

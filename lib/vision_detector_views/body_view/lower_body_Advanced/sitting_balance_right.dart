@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import '../assembly.dart';
 import 'package:audioplayers/audioplayers.dart';//播放音檔
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Detector_sitting_balance_right implements Detector_default{
   int posetimecounter = 0; //復健動作持續秒數
@@ -25,7 +26,36 @@ class Detector_sitting_balance_right implements Detector_default{
   String mindText = "請將全身拍攝於畫面內\n並維持鏡頭穩定\n準備完成請按「Start」";
   final AudioCache player = AudioCache();
   final AudioPlayer _audioPlayer = AudioPlayer();//播放音檔
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
   void startd(){//倒數計時
       int counter = 5;
       buttom_false = false;
@@ -161,15 +191,18 @@ class Detector_sitting_balance_right implements Detector_default{
 
   @override
   Future<void> sounder(int counter) async {
-    await _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+    String audioPath = '${getAudioPath()}/${counter}.${getAudioDataForm()}';
+    await _audioPlayer.play(AssetSource(audioPath));
   }
 
   Future<void> posesounder(bool BOO) async {
     await Future.delayed(Duration(seconds: 1));
+    await _loadLanguagePreference();
+    String baseAudioPath = getAudioPath();
     if(BOO){
-      await _audioPlayer.play(AssetSource('pose_audios/lower/sitting_balance_right.mp3'));
+      await _audioPlayer.play(AssetSource('$baseAudioPath/lower/sitting_balance_right.${getAudioDataForm()}'));
     }else{
-      await _audioPlayer.play(AssetSource('pose_audios/lower/sitting_balance_left.mp3'));
+      await _audioPlayer.play(AssetSource('$baseAudioPath/lower/sitting_balance_left.${getAudioDataForm()}'));
     }
   }
 }

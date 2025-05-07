@@ -409,7 +409,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/56.png',
+                                            'assets/images/yawning.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -525,7 +525,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/58.png',
+                                            'assets/images/56.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -601,7 +601,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/60.png',
+                                            'assets/images/28.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -635,7 +635,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/61.png',
+                                            'assets/images/salivary-glands.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -677,7 +677,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/puff.png',
+                                            'assets/images/upset.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -711,7 +711,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/61.png',
+                                            'assets/images/tongue-depressor.png',
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,

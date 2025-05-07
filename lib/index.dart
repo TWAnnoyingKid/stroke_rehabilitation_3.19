@@ -1,6 +1,8 @@
 // Export pages
 export '/login/login_widget.dart' show LoginWidget;
 export '/setting/setting_widget.dart' show SettingWidget;
+export '/settings_menu/settings_menu_widget.dart' show SettingsMenuWidget;
+export '/preference_settings/preference_settings_widget.dart' show PreferenceSettingsWidget;
 export '/need/need_widget.dart' show NeedWidget;
 export '/home/home_widget.dart' show HomeWidget;
 export '/need2/need2_widget.dart' show Need2Widget;

@@ -16,6 +16,7 @@ import '../../vision_detector_views/label_detector_view/camera_view.dart';
 import '../../vision_detector_views/label_detector_view/painters/label_detector_painter.dart';
 import 'package:audioplayers/audioplayers.dart';//播放音檔
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class flick_tougue extends StatefulWidget {
   @override
@@ -388,7 +389,36 @@ class Detector_flick_tougue {
   String faceImg    = 'assets/images/non.png';
   final AudioCache player = AudioCache();
   final AudioPlayer _audioPlayer = AudioPlayer();//撥放音檔
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
 
   void FaceDetector() {
     //偵測判定

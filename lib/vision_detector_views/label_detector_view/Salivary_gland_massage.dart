@@ -15,6 +15,7 @@ import '../painters/pose_painter.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Salivary_gland_massage extends StatefulWidget {
   @override
@@ -32,6 +33,7 @@ class _PoseDetectorViewState extends State<Salivary_gland_massage> {
   @override
   void initState() {
     super.initState();
+
   }
 
   @override
@@ -354,7 +356,35 @@ class salivary_gland_massage {
   double? initialY; // 记录初始Y位置
   double? initialRightHandY; // 右手初始Y坐标
   double? initialLeftHandY;  // 左手初始Y坐标
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
 
   void startd(){//倒數計時
     int counter = 5;
@@ -565,7 +595,7 @@ class salivary_gland_massage {
           if ((currentY - this.initialY!).abs() >= 30) {
             // 记录当前完成一次移动
             this.posecounter++;
-            this.orderText = "做得好! 已完成${this.posecounter}次";
+            this.orderText = "做得好!";
             this.sounder(this.posecounter);
 
             // 更新初始位置为当前位置，继续检测下一次移动
@@ -573,7 +603,7 @@ class salivary_gland_massage {
           }
         } else {
           // 如果手不在指定位置，提示用户
-          this.orderText = "請保持雙手在正確位置";
+          this.orderText = "請保持雙手在指定位置";
         }
       }
     } else if (DetectorED) {
@@ -636,12 +666,13 @@ class salivary_gland_massage {
   }
 
   void sounder(int counter){
+    _loadLanguagePreference();
     if(counter == 999 && sound && startdDetector){
-      _audioPlayer.play(AssetSource('pose_audios/upper/shrug.mp3'));
+      _audioPlayer.play(AssetSource('${getAudioPath()}/upper/shrug.${getAudioDataForm()}'));
       sound = false;
       // startReminder();
     }else
-      _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+      _audioPlayer.play(AssetSource('${getAudioPath()}/${counter}.${getAudioDataForm()}'));
   }
 //   Future<void> posesounder(bool BOO) async {
 //     await Future.delayed(Duration(seconds: 2));

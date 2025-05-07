@@ -32,7 +32,7 @@ class AudioProcessor {
   static const int butterOrder = 5;           // 濾波器階數
 
   // 頻譜閘控參數
-  static const double noiseReductionStrength = 0.6; // 降噪強度 (0-1)
+  static const double noiseReductionStrength = 0.7; // 降噪強度 (0-1)
   static const int fftWindowSize = 2048;            // FFT窗口大小
 
   /// 處理音頻 - 自動執行採樣率調整、降噪和分割
@@ -389,7 +389,7 @@ class AudioProcessor {
     Float64List result = Float64List(samplesLength);
 
     // 假設前1秒的音頻是噪聲
-    int noiseLength = math.min(samplesLength, sampleRate);
+    int noiseLength = math.min(samplesLength, (2.5 * sampleRate).round());
     Float64List noiseProfile = samples.sublist(0, noiseLength);
 
     // 計算噪聲功率頻譜

@@ -15,6 +15,7 @@ import '../painters/pose_painter.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Shoulder_activities extends StatefulWidget {
   @override
@@ -340,6 +341,35 @@ class shoulder_activities {
   Timer? reminderTimer; // 用于定时提示
   Timer? reminderTimer2; // 用於定時提示
   Timer? reminderTimer3; // 用於定時提示
+  String _languagePreference = 'chinese'; // 預設為中文
+
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
 
   void startd(){//倒數計時
     int counter = 5;
@@ -490,17 +520,19 @@ class shoulder_activities {
   }
 
   void sounder(int counter){
+    _loadLanguagePreference();
     if(counter == 999 && sound && startdDetector){
-      _audioPlayer.play(AssetSource('pose_audios/upper/shrug.mp3'));
+      _audioPlayer.play(AssetSource('${getAudioPath()}/upper/shrug.${getAudioDataForm()}'));
       sound = false;
       startReminder();
     }else
-      _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+      _audioPlayer.play(AssetSource('${getAudioPath()}/${counter}.${getAudioDataForm()}'));
   }
   Future<void> posesounder(bool BOO) async {
+    _loadLanguagePreference();
     await Future.delayed(Duration(seconds: 2));
     if(BOO){
-      await _audioPlayer.play(AssetSource('pose_audios/done.mp3'));
+      await _audioPlayer.play(AssetSource('${getAudioPath()}//done.${getAudioDataForm()}'));
     }
     // else{
     //   player.play('pose_audios/upper/shrug.mp3');
@@ -512,9 +544,10 @@ class shoulder_activities {
     int counter = 0; // 新建一个计数器
 
     reminderTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _loadLanguagePreference();
       // 播放音频
       if(startdDetector) {
-        _audioPlayer.play(AssetSource('pose_audios/upper/shrug.mp3'));
+        _audioPlayer.play(AssetSource('${getAudioPath()}/upper/shrug.${getAudioDataForm()}'));
       }
       // 每5秒归零并打印当前计数
       print("计数器归零前的计数: $counter");
@@ -567,7 +600,7 @@ class shoulder_activities {
       // 播放音频
       if (distance(Standpoint_bodymind_x!, Standpoint_bodymind_y!,
           (posedata[22]!+posedata[24]!)/2, (posedata[23]!+posedata[25]!)/2)>80&&this.startdDetector) {
-        _audioPlayer.play(AssetSource('pose_audios/upper/Excessive_roll.mp3'));
+        _audioPlayer.play(AssetSource('pose_audios/upper/Excessive_roll.mp3'));//側請
       }
 
 

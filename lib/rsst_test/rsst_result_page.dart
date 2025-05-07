@@ -10,6 +10,10 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import 'package:path/path.dart' show basename;
 import 'audio_processor.dart';
 import 'swallow_detector.dart'; // 引入吞嚥檢測器
+import 'package:http/http.dart' as http;
+import '../../main.dart';
+import '../../flutter_flow/flutter_flow_util.dart';
+import '../../trainmouth/trainmouth_widget.dart';
 
 class RsstResultPage extends StatefulWidget {
   final int swallowCount;
@@ -109,15 +113,20 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
         // 進行 ONNX 模型推論
         try {
           final inferenceResult = await _swallowDetector.detectSwallows(_audioSegments);
+          setState(() {
+            _detectedSwallowCount = inferenceResult['swallowCount'];
+            _swallowTimes = inferenceResult['swallowTimes'];
+            _swallowProbs = inferenceResult['swallowProbs'];
+            _isInferencing = false;
+          });
 
-          // 模擬上傳結果到服務器（實際應用中應該調用真實API）
           if (!widget.isFromUpload) {
             try {
               // 這裡應該是實際的API調用
-              await Future.delayed(Duration(seconds: 1)); // 模擬網絡延遲
+              await endoutrsst(_detectedSwallowCount);
               // 如果API調用成功，設置上傳成功狀態
               setState(() {
-                _uploadSuccess = true; // 在實際應用中，這應該基於API響應
+                _uploadSuccess = true;
               });
             } catch (e) {
               print('上傳結果失敗: $e');
@@ -126,15 +135,8 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
               });
             }
           }
-
-          setState(() {
-            _detectedSwallowCount = inferenceResult['swallowCount'];
-            _swallowTimes = inferenceResult['swallowTimes'];
-            _swallowProbs = inferenceResult['swallowProbs'];
-            _isInferencing = false;
-          });
-
           print('檢測到 $_detectedSwallowCount 次吞嚥');
+
         } catch (e) {
           print('模型推論失敗: $e');
           setState(() {
@@ -517,8 +519,8 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
             SizedBox(height: 10),
             Text(
               _isInferencing
-                  ? '使用 ONNX 模型分析吞嚥次數，請稍候...'
-                  : '正在應用降噪和分割處理，請稍候...',
+                  ? '分析吞嚥次數，請稍候...'
+                  : '正在進行處理，請稍候...',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -641,25 +643,6 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ),
                     ),
                     const SizedBox(height: 30),
-                    Column(
-                      children: [
-                        Icon(
-                          _uploadSuccess ? Icons.check_circle : Icons.error,
-                          color: _uploadSuccess ? Colors.green : Colors.red,
-                          size: 40,
-                        ),
-                        const SizedBox(height: 10),
-                        AutoSizeText(
-                          _uploadSuccess ? '結果已儲存！獲得10點數。' : '結果儲存失敗，但您仍完成了測驗。',
-                          textAlign: TextAlign.center,
-                          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            fontFamily: 'Poppins',
-                            color: _uploadSuccess ? Colors.green : Colors.red,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
                   ] else ...[
                     const SizedBox(height: 10),
                     AutoSizeText(
@@ -690,48 +673,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Icon(
-                      Icons.audio_file,
-                      size: 40,
-                      color: Color(0xFF2E5AAC),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '音檔已成功處理並分析',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E5AAC),
-                      ),
-                    ),
                   ],
-
-                  // 處理完成的提示
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.green.shade200),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.green),
-                          SizedBox(height: 5),
-                          Text(
-                            '音檔已經過降噪處理及分析完成',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
 
                   // 顯示吞嚥時間點（如果有檢測到）
                   if (_swallowTimes.isNotEmpty) ...[
@@ -759,7 +701,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                               height: 150,
                               child: ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: math.min(10, _swallowTimes.length),
+                                itemCount: math.min(20, _swallowTimes.length),
                                 itemBuilder: (context, index) {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -791,9 +733,9 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                                 },
                               ),
                             ),
-                            if (_swallowTimes.length > 10)
+                            if (_swallowTimes.length > 20)
                               Text(
-                                '... 以及 ${_swallowTimes.length - 10} 個更多時間點',
+                                '... 以及 ${_swallowTimes.length - 20} 個更多時間點',
                                 style: TextStyle(
                                   fontStyle: FontStyle.italic,
                                   fontSize: 12,
@@ -802,162 +744,6 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                               ),
                           ],
                         ),
-                      ),
-                    ),
-                  ],
-
-                  // 顯示音檔相關資訊
-                  if (_denoisedFilePath != null || widget.recordingPath != null) ...[
-                    const SizedBox(height: 10),
-                    Divider(color: Colors.grey.shade300),
-                    const SizedBox(height: 10),
-                    Text(
-                      '音檔資訊',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Color(0xFF2E5AAC),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 音檔採樣率
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '原始採樣率:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    '$_originalSampleRate Hz',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: _originalSampleRate == 44100 ? Colors.green.shade800 : Colors.orange.shade800,
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Icon(
-                                    _originalSampleRate == 44100 ? Icons.check_circle : Icons.info_outline,
-                                    color: _originalSampleRate == 44100 ? Colors.green.shade800 : Colors.orange.shade800,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-
-                          // 調整後採樣率
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '調整後採樣率:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    '$_sampleRate Hz',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.green.shade800,
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green.shade800,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-
-                          // 音檔長度
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '音檔長度:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                _audioFileDuration,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blue.shade800,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-
-                          // 處理結果
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '分割片段數:',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                '${_audioSegments.length}',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.blue.shade800,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-
-                          // 檔案名稱
-                          Text(
-                            '原始檔案:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            widget.recordingPath != null ? basename(widget.recordingPath!) : '未知',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade800,
-                              fontFamily: 'Courier',
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
                       ),
                     ),
                   ],
@@ -1024,7 +810,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '降噪後音頻波形',
+                    '音頻波形',
                     style: FlutterFlowTheme.of(context).titleMedium.override(
                       fontFamily: 'Poppins',
                       color: const Color(0xFF2E5AAC),
@@ -1032,62 +818,7 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  if (_originalSampleRate != 44100)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: Colors.orange.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.orange, size: 16),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                '原始採樣率 $_originalSampleRate Hz 已自動轉換為標準的 44.1kHz',
-                                style: TextStyle(
-                                  color: Colors.orange.shade800,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                   const SizedBox(height: 10),
-                  // 降噪提示
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Colors.green.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.audio_file, color: Colors.green, size: 16),
-                          SizedBox(width: 5),
-                          Expanded(
-                            child: Text(
-                              '此音檔已經過巴特沃斯濾波與頻譜閘控降噪處理',
-                              style: TextStyle(
-                                color: Colors.green.shade800,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
                   // 音檔長度和播放時長顯示
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
@@ -1107,35 +838,6 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                       ),
                     ),
                   ),
-
-                  // 標記吞嚥時間點
-                  if (_swallowTimes.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.water_drop, color: Colors.red, size: 16),
-                            SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                '在波形上標記了 ${_swallowTimes.length} 個吞嚥點',
-                                style: TextStyle(
-                                  color: Colors.red.shade800,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
 
                   // 音頻播放控制
                   if (_denoisedFilePath != null && _audioPlayer != null)
@@ -1167,36 +869,18 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Stack(
-                              children: [
-                                SliderTheme(
-                                  data: SliderThemeData(
-                                    thumbColor: const Color(0xFF2E5AAC),
-                                    activeTrackColor: const Color(0xFF2E5AAC),
-                                    inactiveTrackColor: Colors.grey.shade300,
-                                  ),
-                                  child: Slider(
-                                    value: _totalDuration.inMilliseconds > 0
-                                        ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds
-                                        : 0.0,
-                                    onChanged: _isAudioSeekable ? _seekTo : null,
-                                  ),
-                                ),
-                                if (!_isAudioSeekable)
-                                  Positioned.fill(
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        '此音檔不支援進度條拖動',
-                                        style: TextStyle(
-                                          color: Colors.red.shade800,
-                                          fontSize: 10,
-                                          backgroundColor: Colors.white.withOpacity(0.7),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                            child: SliderTheme(
+                              data: SliderThemeData(
+                                thumbColor: const Color(0xFF2E5AAC),
+                                activeTrackColor: const Color(0xFF2E5AAC),
+                                inactiveTrackColor: Colors.grey.shade300,
+                              ),
+                              child: Slider(
+                                value: _totalDuration.inMilliseconds > 0
+                                    ? _currentPosition.inMilliseconds / _totalDuration.inMilliseconds
+                                    : 0.0,
+                                onChanged: _isAudioSeekable ? _seekTo : null,
+                              ),
                             ),
                           ),
                         ],
@@ -1401,5 +1085,30 @@ class _RsstResultPageState extends State<RsstResultPage> with SingleTickerProvid
         ),
       ),
     );
+  }
+}
+Future<void> endoutrsst(int rsst_test_times) async {
+  DateTime now = DateTime.now();
+  String formattedDate = DateFormat('yyyy-MM-dd').format(now);
+  var url;
+  url = Uri.parse(ip+"train_mouthok.php");
+  print(url);
+  print("測試,吞嚥");
+
+  final responce = await http.post(url,body:{
+    "time": formattedDate,
+    "account": FFAppState().accountnumber.toString(),
+    "action": "RSST", //動作, //動作
+    "degree": "測試",
+    "parts": "吞嚥",
+    "times": "1",
+    "rsst_test_times":rsst_test_times.toString(),
+    "coin_add": "5",
+  });
+  if (responce.statusCode == 200) {
+    print("ok");
+  } else {
+    print(responce.statusCode);
+    print("no");
   }
 }

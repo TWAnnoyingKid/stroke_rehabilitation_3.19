@@ -18,6 +18,7 @@ import '../../vision_detector_views/label_detector_view/roi_processor.dart'; // 
 import 'package:audioplayers/audioplayers.dart';//播放音檔
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
+import 'package:shared_preferences/shared_preferences.dart';
 
 // 繪製ROI框的Painter
 class ROIPainter extends CustomPainter {
@@ -290,7 +291,7 @@ class _ImageLabelViewState extends State<tongue_depresser>{
             child: Container(
               padding: EdgeInsets.all(30),
               decoration: new BoxDecoration(
-                color: Color.fromARGB(250, 65, 64, 64),
+                color: Color.fromARGB(127, 65, 64, 64),
                 borderRadius: BorderRadius.horizontal(
                   left: Radius.circular(30),
                   right: Radius.circular(30),
@@ -557,7 +558,36 @@ class Detector_tongue_depresser {
   String faceImg    = 'assets/images/non.png';
   final AudioCache player = AudioCache();
   final AudioPlayer _audioPlayer = AudioPlayer();//撥放音檔
+  String _languagePreference = 'chinese'; // 預設為中文
 
+  Future<void> initialize() async {
+    await _loadLanguagePreference();
+  }
+
+  // 從 SharedPreferences 載入語言偏好設定
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _languagePreference = prefs.getString('language_preference') ?? 'chinese';
+  }
+
+  // 獲取音頻目錄路徑
+  String getAudioPath() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'taigi_pose_audios'; // 台語
+    } else {
+      return 'pose_audios'; // 預設中文
+    }
+  }
+
+  String getAudioDataForm() {
+    // 根據語言偏好選擇目錄
+    if (_languagePreference == 'taiwanese') {
+      return 'wav'; // 台語
+    } else {
+      return 'mp3'; // 預設中文
+    }
+  }
   // 取得真正的檢測結果（考慮狀態維持）
   String getStableDetectResult() {
     // 如果當前結果是目標特徵，直接返回
@@ -716,7 +746,9 @@ class Detector_tongue_depresser {
   }
   @override
   Future<void> sounder(int counter) async {
-    await _audioPlayer.play(AssetSource('pose_audios/${counter}.mp3'));
+    await _loadLanguagePreference(); // 確保獲取最新設定
+    String audioPath = '${getAudioPath()}/${counter}.${getAudioDataForm()}';
+    await _audioPlayer.play(AssetSource(audioPath));
   }
 }
 Future<void> endout14() async {
