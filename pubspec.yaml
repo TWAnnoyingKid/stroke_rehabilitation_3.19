@@ -105,6 +105,7 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/videos/
+#    - assets/face_videos/
     - assets/audios/
     - assets/lottie_animations/
     - assets/rive_animations/
