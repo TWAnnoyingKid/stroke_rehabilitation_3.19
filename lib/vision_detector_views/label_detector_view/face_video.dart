@@ -31,7 +31,7 @@ class _VideoAppState extends State<FaceVideoApp> {
       _facenumber = 8;
     }
     _controller = VideoPlayerController.network(
-        'https://github.com/cherrytank/stroke_rehabilitation_app/raw/main/assets/face_videos/${_facenumber}.mp4')
+        'https://github.com/TWAnnoyingKid/stroke_rehabilitation_3.19/raw/main/assets/face_videos/${_facenumber}.mp4')
       ..initialize().then((_) {
           // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
           setState(() {});
