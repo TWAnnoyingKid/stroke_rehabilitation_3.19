@@ -84,7 +84,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                       padding: EdgeInsetsDirectional.fromSTEB(
                           screenWidth * 0.03, 0.0, 0.0, 0.0),
                                 child: Image.asset(
-                        'assets/images/14.png', // Placeholder for mouth training icon
+                        'assets/images/15.png', // Placeholder for mouth training icon
                         width: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
                         height: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
                                   fit: BoxFit.contain,
@@ -94,7 +94,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                       padding: EdgeInsetsDirectional.fromSTEB(
                           screenWidth * 0.04, 0.0, 0.0, 0.0),
                                 child: Text(
-                        '口腔訓練',
+                                  '口腔訓練',
                                   textAlign: TextAlign.start,
                                   style: FlutterFlowTheme.of(context)
                                       .displaySmall
@@ -917,7 +917,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                 color: FlutterFlowTheme.of(context).primaryBtnText,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               _buildBottomNavItem(
                                   context,
@@ -1038,10 +1038,10 @@ Widget _buildBottomNavItem(
   // 根據方向設置不同的尺寸比例
   final iconWidth = isLandscape
       ? screenHeight * 0.08
-      : screenWidth * 0.15;
+      : screenWidth * 0.12;
   final iconHeight = isLandscape
       ? screenHeight * 0.08
-      : screenWidth * 0.15;
+      : screenWidth * 0.12;
   final fontSize = isLandscape
       ? screenHeight * 0.03
       : screenWidth * 0.04;

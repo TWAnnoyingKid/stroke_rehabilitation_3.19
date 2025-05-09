@@ -94,8 +94,8 @@ class _TrainupperbodyWidgetState extends State<TrainupperbodyWidget> {
               Container(
                 width: double.infinity,
                 height: isLandscape
-                    ? screenHeight * 0.12
-                    : screenHeight * 0.09, // 根據方向設置不同的高度比例
+                    ? screenHeight * 0.15
+                    : screenHeight * 0.1, // 根據方向設置不同的高度比例
                 color: Color(0xFF90BDF9),
                 padding: EdgeInsets.symmetric(
                     vertical: isLandscape ? screenHeight * 0.01 : screenHeight * 0.01),
@@ -372,7 +372,7 @@ Widget _buildLevelButton({
       : screenSize.width * 0.3;
 
   final fontSize = isLandscape
-      ? screenSize.height * 0.09
+      ? screenSize.height * 0.08
       : screenSize.width * 0.12;
 
   return Container(
@@ -423,11 +423,11 @@ Widget _buildBottomNavItem(
 
   // 根據方向設置不同的尺寸比例
   final iconWidth = isLandscape
-      ? screenHeight * 0.09
-      : screenWidth * 0.15;
+      ? screenHeight * 0.08
+      : screenWidth * 0.12;
   final iconHeight = isLandscape
-      ? screenHeight * 0.09
-      : screenWidth * 0.15;
+      ? screenHeight * 0.08
+      : screenWidth * 0.12;
   final fontSize = isLandscape
       ? screenHeight * 0.03
       : screenWidth * 0.04;

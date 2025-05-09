@@ -690,10 +690,10 @@ Widget _buildBottomNavItem(
   // 根據方向設置不同的尺寸比例
   final iconWidth = isLandscape
       ? screenHeight * 0.08
-      : screenWidth * 0.15;
+      : screenWidth * 0.12;
   final iconHeight = isLandscape
       ? screenHeight * 0.08
-      : screenWidth * 0.15;
+      : screenWidth * 0.12;
   final fontSize = isLandscape
       ? screenHeight * 0.03
       : screenWidth * 0.04;

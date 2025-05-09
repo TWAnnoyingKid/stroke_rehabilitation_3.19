@@ -14,6 +14,7 @@ import 'setting_model.dart';
 export 'setting_model.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingWidget extends StatefulWidget {
   const SettingWidget({Key? key}) : super(key: key);
@@ -25,15 +26,12 @@ class SettingWidget extends StatefulWidget {
 class _SettingWidgetState extends State<SettingWidget> {
   late SettingModel _model;
 
-  var age1 ; //取得年齡
-  var  a =DateTime.now();//取得現在日期
+  var age1; //取得年齡
+  var a = DateTime.now(); //取得現在日期
 
-  void editData(){
-
-
-    var url = Uri.parse(ip+"editdata1.php");
-    http.post(url,body: {
-
+  void editData() {
+    var url = Uri.parse(ip + "editdata1.php");
+    http.post(url, body: {
       "name": _model.textController1.text,
       "nickname": _model.textController2.text,
       "phone": _model.textController3.text,
@@ -41,37 +39,40 @@ class _SettingWidgetState extends State<SettingWidget> {
       "urgenphone": _model.textController5.text,
       "birthday": FFAppState().timepicker.toString(),
       "gender": FFAppState().gender,
-      "diagnosis":FFAppState().diagnosis,
-      "account":FFAppState().accountnumber,
-      "affectedside":FFAppState().affectedside,
-      "age":age1 ,
-      "joindate":FFAppState().time.toString(),
-
+      "diagnosis": FFAppState().diagnosis,
+      "account": FFAppState().accountnumber,
+      "affectedside": FFAppState().affectedside,
+      "age": age1,
+      "joindate": FFAppState().joindate.toString(),
     });
   }
-  String getAge(DateTime brt){  //年齡
-    int age = 0 ;
+
+  String getAge(DateTime brt) {
+    //年齡
+    int age = 0;
     DateTime dateTime = DateTime.now();
-    if (dateTime.isBefore(brt)) { //出生日期晚於當前時間，無法計算
-      return '出生日期不正確' ;
+    if (dateTime.isBefore(brt)) {
+      //出生日期晚於當前時間，無法計算
+      return '出生日期不正確';
     }
-    int yearNow = dateTime.year;   //當前年份
-    int monthNow = dateTime.month;   //當前月份
+    int yearNow = dateTime.year; //當前年份
+    int monthNow = dateTime.month; //當前月份
     int dayOfMonthNow = dateTime.day; //當前日期
 
     int yearBirth = brt.year;
     int monthBirth = brt.month;
     int dayOfMonthBirth = brt.day;
-    age = yearNow - yearBirth;    //計算整歲數
+    age = yearNow - yearBirth; //計算整歲數
     if (monthNow <= monthBirth) {
       if (monthNow == monthBirth) {
         if (dayOfMonthNow < dayOfMonthBirth) age--; //當前日期在生日之前，年齡減一
       } else {
-        age --; //當前月份在生日之前，年齡減一
+        age--; //當前月份在生日之前，年齡減一
       }
     }
     return age.toString();
   }
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final _unfocusNode = FocusNode();
 
@@ -88,6 +89,11 @@ class _SettingWidgetState extends State<SettingWidget> {
         TextEditingController(text: FFAppState().urgenname);
     _model.textController5 ??=
         TextEditingController(text: FFAppState().nickphone);
+
+    // Initialize joindate if null, similar to FFAppState().time logic
+    if (FFAppState().joindate == null) {
+      FFAppState().joindate = DateTime.now();
+    }
   }
 
   @override
@@ -101,12 +107,26 @@ class _SettingWidgetState extends State<SettingWidget> {
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
-    //print(a);//測試顯示日期
-    if(FFAppState().time==null) {//判斷加入日期
-      FFAppState().time = a;
-    }
-    //print(FFAppState().time);//測試顯示日期
+
     final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // Responsive dimensions
+    final double appBarTitleFontSize = isLandscape ? screenHeight * 0.05 : screenWidth * 0.07;
+    final double generalPadding = isLandscape ? screenWidth * 0.02 : screenWidth * 0.04;
+    final double itemSpacing = isLandscape ? screenHeight * 0.02 : screenHeight * 0.02;
+
+    final double avatarSize = isLandscape ? screenHeight * 0.22 : screenWidth * 0.28;
+    final double labelFontSize = isLandscape ? screenHeight * 0.035 : screenWidth * 0.05;
+    final double valueFontSize = isLandscape ? screenHeight * 0.032 : screenWidth * 0.045;
+    final double textFieldHeight = isLandscape ? screenHeight * 0.08 : screenHeight * 0.055;
+    final double dropDownWidth = isLandscape ? screenWidth * 0.35 : screenWidth * 0.68;
+    final double dropDownHeight = isLandscape ? screenHeight * 0.1 : screenHeight * 0.07;
+    final double buttonWidth = isLandscape ? screenWidth * 0.25 : screenWidth * 0.4;
+    final double buttonHeight = isLandscape ? screenHeight * 0.1 : screenHeight * 0.06;
+    final double buttonFontSize = isLandscape ? screenHeight * 0.035 : screenWidth * 0.05;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
@@ -115,1182 +135,678 @@ class _SettingWidgetState extends State<SettingWidget> {
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: screenSize.width,
-
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
+          child: Column( // Main column for three-pane layout
+            children: [
+              // Top Bar - Header
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                    vertical: isLandscape ? screenHeight * 0.02 : screenHeight * 0.015,
+                    horizontal: screenWidth * 0.05),
+                color: Color(0xFF90BDF9), // Consistent color from other pages
+                child: Text(
+                  '個人設定',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).displaySmall.override(
+                    fontFamily: 'Poppins',
+                    fontSize: appBarTitleFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 1.0,
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondaryBackground,
-                        ),
+                ),
+              ),
 
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+              // Middle Section - Scrollable Form Content
+              Expanded(
+                child: Container(
+                  width: screenWidth,
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  padding: EdgeInsets.all(generalPadding),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // User avatar and basic info section - improved for landscape
+                        Padding(
+                          padding: EdgeInsets.only(bottom: generalPadding),
+                          child: isLandscape
+                              ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            15.0, 0.0, 0.0, 0.0),
-                                        child: CachedNetworkImage(
-                                          imageUrl: FFAppState().avatar,
-                                          width: MediaQuery.of(context).size.width * 0.3,
-                                          height: MediaQuery.of(context).size.height * 0.15,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Text(
-                                        '帳號 :',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 25.0,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        '姓名 :',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 25.0,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                      Text(
-                                        '暱稱 :',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 25.0,
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 0.45,
-                                        height: MediaQuery.of(context).size.height * 0.05,
-                                        decoration: BoxDecoration(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryBackground,
-                                        ),
-                                        child: AutoSizeText(
-                                          FFAppState().accountnumber,
-                                          textAlign: TextAlign.center,
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 30.0,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 0.45,
-                                        height: MediaQuery.of(context).size.height * 0.05,
-                                        decoration: BoxDecoration(),
-                                        child: Container(
-                                          width: 190.0,
-                                          child: TextFormField(
-                                            controller: _model.textController1,
-                                            onChanged: (_) => EasyDebounce.debounce(
-                                              '_model.textController1',
-                                              Duration(milliseconds: 2000),
-                                                  () => setState(() {}),
-                                            ),
-                                            onFieldSubmitted: (_) async {
-                                              setState(() {
-                                                FFAppState().name =
-                                                    _model.textController1.text;
-                                              });
-                                            },
-                                            obscureText: false,
-                                            decoration: InputDecoration(
-                                              hintText: '請輸入姓名',
-                                              hintStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 24.0,
-                                              ),
-                                              enabledBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              errorBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedErrorBorder:
-                                              UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius:
-                                                const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              suffixIcon: _model.textController1!
-                                                  .text.isNotEmpty
-                                                  ? InkWell(
-                                                onTap: () async {
-                                                  _model.textController1
-                                                      ?.clear();
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  Icons.clear,
-                                                  color: Color(0xFF757575),
-                                                  size: 24.0,
-                                                ),
-                                              )
-                                                  : null,
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .titleMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 30.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            validator: _model
-                                                .textController1Validator
-                                                .asValidator(context),
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 0.45,
-                                        height: MediaQuery.of(context).size.height * 0.05,
-                                        decoration: BoxDecoration(),
-                                        child: TextFormField(
-                                          controller: _model.textController2,
-                                          onChanged: (_) => EasyDebounce.debounce(
-                                            '_model.textController2',
-                                            Duration(milliseconds: 2000),
-                                                () => setState(() {}),
-                                          ),
-                                          onFieldSubmitted: (_) async {
-                                            setState(() {
-                                              FFAppState().nickname =
-                                                  _model.textController2.text;
-                                            });
-                                          },
-                                          obscureText: false,
-                                          decoration: InputDecoration(
-                                            hintText: '請輸入暱稱',
-                                            hintStyle: FlutterFlowTheme.of(context)
-                                                .bodySmall
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 24.0,
-                                            ),
-                                            enabledBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(4.0),
-                                                topRight: Radius.circular(4.0),
-                                              ),
-                                            ),
-                                            focusedBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(4.0),
-                                                topRight: Radius.circular(4.0),
-                                              ),
-                                            ),
-                                            errorBorder: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(4.0),
-                                                topRight: Radius.circular(4.0),
-                                              ),
-                                            ),
-                                            focusedErrorBorder:
-                                            UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Color(0x00000000),
-                                                width: 1.0,
-                                              ),
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(4.0),
-                                                topRight: Radius.circular(4.0),
-                                              ),
-                                            ),
-                                            suffixIcon: _model.textController2!.text
-                                                .isNotEmpty
-                                                ? InkWell(
-                                              onTap: () async {
-                                                _model.textController2
-                                                    ?.clear();
-                                                setState(() {});
-                                              },
-                                              child: Icon(
-                                                Icons.clear,
-                                                color: Color(0xFF757575),
-                                                size: 24.0,
-                                              ),
-                                            )
-                                                : null,
-                                          ),
-                                          style: FlutterFlowTheme.of(context)
-                                              .titleMedium
-                                              .override(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 30.0,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                          validator: _model.textController2Validator
-                                              .asValidator(context),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0, 0, generalPadding, 0),
+                                child: CachedNetworkImage(
+                                  imageUrl: FFAppState().avatar,
+                                  width: avatarSize,
+                                  height: avatarSize,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                              SingleChildScrollView(
+                              Expanded(
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        final _datePickedDate = await showDatePicker(
-                                          context: context,
-                                          initialDate: getCurrentTimestamp,
-                                          firstDate: DateTime(1900),
-                                          lastDate: DateTime(2050),
-                                        );
-
-                                        if (_datePickedDate != null) {
-                                          setState(() {
-                                            _model.datePicked = DateTime(
-                                              _datePickedDate.year,
-                                              _datePickedDate.month,
-                                              _datePickedDate.day,
-                                            );
-                                          });
-                                        }
-                                        setState(() {
-                                          FFAppState().timepicker = _model.datePicked;
-                                        });
-                                      },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                18.0, 0.0, 0.0, 0.0),
-                                            child: Text(
-                                              '生日 :',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 27.0,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            dateTimeFormat(
-                                                'yMd', FFAppState().timepicker),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 10.0, 0.0),
-                                            child: Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: Colors.black,
-                                              size: 24.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '年齡 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 27.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        if(FFAppState().timepicker!=null)
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                120.0, 0.0, 0.0, 0.0),
-                                            child:
-                                            Text(
-                                              age1=getAge(FFAppState().timepicker as DateTime),
-                                              style: FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 25.0,
-                                              ),
-                                            ),
-                                          ),
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 10.0, 0.0),
-                                          child: Text(
-                                            '歲',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        var confirmDialogResponse =
-                                            await showDialog<bool>(
-                                              context: context,
-                                              builder: (alertDialogContext) {
-                                                return AlertDialog(
-                                                  title: Text('請選擇性別'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext,
-                                                              false),
-                                                      child: Text('男'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              alertDialogContext,
-                                                              true),
-                                                      child: Text('女'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            ) ??
-                                                false;
-                                        if (confirmDialogResponse) {
-                                          setState(() {
-                                            FFAppState().avatar =
-                                            'https://www.creativefabrica.com/wp-content/uploads/users/2019/08/avatar_393721.jpg';
-                                          });
-                                          setState(() {
-                                            FFAppState().avatar =
-                                                FFAppState().imagegirl;
-                                          });
-                                          setState(() {
-                                            FFAppState().gender = '女';
-                                          });
-                                        } else {
-                                          setState(() {
-                                            FFAppState().avatar =
-                                            'https://www.creativefabrica.com/wp-content/uploads/users/2019/08/avatar_393721.jpg';
-                                          });
-                                          setState(() {
-                                            FFAppState().avatar =
-                                                FFAppState().imageboy;
-                                          });
-                                          setState(() {
-                                            FFAppState().gender = '男';
-                                          });
-                                        }
-                                      },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                18.0, 0.0, 0.0, 0.0),
-                                            child: Text(
-                                              '性別 :',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 27.0,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            FFAppState().gender,
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 10.0, 0.0),
-                                            child: Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: Colors.black,
-                                              size: 24.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '診斷 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 27.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                                          child: FlutterFlowDropDown<String>(
-                                            controller:
-                                            _model.dropDownValueController1 ??=
-                                                FormFieldController<String>(
-                                                  _model.dropDownValue1 ??=
-                                                      FFAppState().diagnosis,
-                                                ),
-                                            options: [
-                                              '左側出血性腦中風',
-                                              '左側缺血性腦中風',
-                                              '右側出血性腦中風',
-                                              '右側缺血性腦中風'
-                                            ],
-                                            onChanged: (val) async {
-                                              setState(
-                                                      () => _model.dropDownValue1 = val);
-                                              setState(() {
-                                                FFAppState().diagnosis =
-                                                _model.dropDownValue1!;
-                                              });
-                                            },
-                                            width: screenSize.width * 0.71,
-                                            height: screenSize.height * 0.08,
-                                            textStyle: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              color: Colors.black,
-                                              fontSize: 22.0,
-                                            ),
-                                            hintText: '請做選擇',
-                                            fillColor: Colors.white,
-                                            elevation: 2.0,
-                                            borderColor: Colors.transparent,
-                                            borderWidth: 0.0,
-                                            borderRadius: 0.0,
-                                            margin: EdgeInsetsDirectional.fromSTEB(
-                                                12.0, 3.0, 12.0, 4.0),
-                                            hidesUnderline: true,
-                                            isSearchable: false,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '患側 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 27.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                          child: FlutterFlowDropDown<String>(
-                                            controller:
-                                            _model.dropDownValueController2 ??=
-                                                FormFieldController<String>(
-                                                  _model.dropDownValue2 ??=
-                                                      FFAppState().affectedside,
-                                                ),
-                                            options: ['左側', '右側'],
-                                            onChanged: (val) async {
-                                              setState(
-                                                      () => _model.dropDownValue2 = val);
-                                              setState(() {
-                                                FFAppState().affectedside =
-                                                _model.dropDownValue2!;
-                                              });
-                                            },
-                                            width: screenSize.width * 0.71,
-                                            height: screenSize.height * 0.08,
-                                            textStyle: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              color: Colors.black,
-                                              fontSize: 22.0,
-                                            ),
-                                            hintText: '請做選擇',
-                                            fillColor: Colors.white,
-                                            elevation: 2.0,
-                                            borderColor: Colors.transparent,
-                                            borderWidth: 0.0,
-                                            borderRadius: 0.0,
-                                            margin: EdgeInsetsDirectional.fromSTEB(
-                                                12.0, 4.0, 12.0, 4.0),
-                                            hidesUnderline: true,
-                                            isSearchable: false,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '連絡電話 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 27.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: TextFormField(
-                                            controller: _model.textController3,
-                                            onChanged: (_) => EasyDebounce.debounce(
-                                              '_model.textController3',
-                                              Duration(milliseconds: 2000),
-                                                  () => setState(() {}),
-                                            ),
-                                            onFieldSubmitted: (_) async {
-                                              setState(() {
-                                                FFAppState().phone =
-                                                    _model.textController3.text;
-                                              });
-                                            },
-                                            obscureText: false,
-                                            decoration: InputDecoration(
-                                              hintText: '請輸入電話',
-                                              hintStyle: FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 24.0,
-                                              ),
-                                              enabledBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              errorBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedErrorBorder:
-                                              UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              suffixIcon: _model.textController3!.text
-                                                  .isNotEmpty
-                                                  ? InkWell(
-                                                onTap: () async {
-                                                  _model.textController3
-                                                      ?.clear();
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  Icons.clear,
-                                                  color: Color(0xFF757575),
-                                                  size: 24.0,
-                                                ),
-                                              )
-                                                  : null,
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            validator: _model.textController3Validator
-                                                .asValidator(context),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '緊急聯絡人 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 27.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: TextFormField(
-                                            controller: _model.textController4,
-                                            onChanged: (_) => EasyDebounce.debounce(
-                                              '_model.textController4',
-                                              Duration(milliseconds: 2000),
-                                                  () => setState(() {}),
-                                            ),
-                                            onFieldSubmitted: (_) async {
-                                              setState(() {
-                                                FFAppState().urgenname =
-                                                    _model.textController4.text;
-                                              });
-                                            },
-                                            obscureText: false,
-                                            decoration: InputDecoration(
-                                              hintText: '請輸入聯絡人',
-                                              hintStyle: FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 24.0,
-                                              ),
-                                              enabledBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              errorBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedErrorBorder:
-                                              UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              suffixIcon: _model.textController4!.text
-                                                  .isNotEmpty
-                                                  ? InkWell(
-                                                onTap: () async {
-                                                  _model.textController4
-                                                      ?.clear();
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  Icons.clear,
-                                                  color: Color(0xFF757575),
-                                                  size: 24.0,
-                                                ),
-                                              )
-                                                  : null,
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            validator: _model.textController4Validator
-                                                .asValidator(context),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Padding(
-                                          padding: EdgeInsetsDirectional.fromSTEB(
-                                              18.0, 0.0, 0.0, 0.0),
-                                          child: Text(
-                                            '緊急聯絡人電話 :',
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25.0,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: TextFormField(
-                                            controller: _model.textController5,
-                                            onChanged: (_) => EasyDebounce.debounce(
-                                              '_model.textController5',
-                                              Duration(milliseconds: 2000),
-                                                  () => setState(() {}),
-                                            ),
-                                            onFieldSubmitted: (_) async {
-                                              setState(() {
-                                                FFAppState().nickphone =
-                                                    _model.textController5.text;
-                                              });
-                                            },
-                                            obscureText: false,
-                                            decoration: InputDecoration(
-                                              hintText: '請輸入電話',
-                                              hintStyle: FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 24.0,
-                                              ),
-                                              enabledBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              errorBorder: UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              focusedErrorBorder:
-                                              UnderlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: Color(0x00000000),
-                                                  width: 1.0,
-                                                ),
-                                                borderRadius: const BorderRadius.only(
-                                                  topLeft: Radius.circular(4.0),
-                                                  topRight: Radius.circular(4.0),
-                                                ),
-                                              ),
-                                              suffixIcon: _model.textController5!.text
-                                                  .isNotEmpty
-                                                  ? InkWell(
-                                                onTap: () async {
-                                                  _model.textController5
-                                                      ?.clear();
-                                                  setState(() {});
-                                                },
-                                                child: Icon(
-                                                  Icons.clear,
-                                                  color: Color(0xFF757575),
-                                                  size: 24.0,
-                                                ),
-                                              )
-                                                  : null,
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .bodyMedium
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 23.0,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            validator: _model.textController5Validator
-                                                .asValidator(context),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    // Generated code for this Row Widget...
-                                    InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () async {
-                                        final _datePicked2Date = await showDatePicker(
-                                          context: context,
-                                          initialDate: getCurrentTimestamp,
-                                          firstDate: DateTime(1900),
-                                          lastDate: DateTime(2050),
-                                        );
-                                        if (_datePicked2Date != null) {
-                                          setState(() {
-                                            _model.datePicked2 = DateTime(
-                                              _datePicked2Date.year,
-                                              _datePicked2Date.month,
-                                              _datePicked2Date.day,
-                                            );
-                                          });
-                                        }
-                                        setState(() {
-                                          FFAppState().joindate = _model.datePicked2;
-                                        });
-                                      },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(18, 0, 0, 0),
-                                            child: Text(
-                                              '加入日期 :',
-                                              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 27,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(
-                                            dateTimeFormat('yMd', FFAppState().joindate),
-                                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 25,
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-                                            child: Icon(
-                                              Icons.arrow_forward_ios,
-                                              color: Colors.black,
-                                              size: 24,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        FFButtonWidget(
-                                          onPressed: () async {
-                                            editData();
-                                          },
-                                          text: '儲存',
-                                          options: FFButtonOptions(
-                                            width: 150.0,
-                                            height: 40.0,
-                                            padding: EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
-                                            iconPadding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 0.0, 0.0),
-                                            color: Color(0xFFFFAC8F),
-                                            textStyle: FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                              fontFamily: 'Poppins',
-                                              color: FlutterFlowTheme.of(context)
-                                                  .black600,
-                                              fontSize: 25.0,
-                                            ),
-                                            elevation: 2.0,
-                                            borderSide: BorderSide(
-                                              color: Colors.transparent,
-                                              width: 1.0,
-                                            ),
-                                            borderRadius: BorderRadius.circular(8.0),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    _buildInfoRow(context, '帳號 :', FFAppState().accountnumber, isLandscape, labelFontSize, valueFontSize, readOnly: true),
+                                    SizedBox(height: itemSpacing),
+                                    _buildEditableInfoRow(context, '姓名 :', _model.textController1!, (val) => FFAppState().name = val, '請輸入姓名', isLandscape, labelFontSize, valueFontSize, textFieldHeight),
+                                    SizedBox(height: itemSpacing),
+                                    _buildEditableInfoRow(context, '暱稱 :', _model.textController2!, (val) => FFAppState().nickname = val, '請輸入暱稱', isLandscape, labelFontSize, valueFontSize, textFieldHeight),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                              : Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0, 0, generalPadding, 0),
+                                child: CachedNetworkImage(
+                                  imageUrl: FFAppState().avatar,
+                                  width: avatarSize,
+                                  height: avatarSize,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildInfoRow(context, '帳號 :', FFAppState().accountnumber, isLandscape, labelFontSize, valueFontSize, readOnly: true),
+                                    SizedBox(height: itemSpacing),
+                                    _buildEditableInfoRow(context, '姓名 :', _model.textController1!, (val) => FFAppState().name = val, '請輸入姓名', isLandscape, labelFontSize, valueFontSize, textFieldHeight),
+                                    SizedBox(height: itemSpacing),
+                                    _buildEditableInfoRow(context, '暱稱 :', _model.textController2!, (val) => FFAppState().nickname = val, '請輸入暱稱', isLandscape, labelFontSize, valueFontSize, textFieldHeight),
                                   ],
                                 ),
                               ),
                             ],
                           ),
+                        ),
 
+                        // Rest of the form fields - optimized for landscape mode with 2 columns
+                        isLandscape
+                            ? _buildLandscapeFormLayout(context, labelFontSize, valueFontSize, itemSpacing, textFieldHeight, dropDownWidth, dropDownHeight)
+                            : _buildPortraitFormLayout(context, labelFontSize, valueFontSize, itemSpacing, textFieldHeight, dropDownWidth, dropDownHeight),
+
+                        SizedBox(height: generalPadding * 1.5),
+
+                        // Save Button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            FFButtonWidget(
+                              onPressed: () async {
+                                editData();
+                                // Optional: Show a confirmation dialog or snackbar
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('資料已儲存', style: TextStyle(fontSize: valueFontSize * 0.8))),
+                                );
+                              },
+                              text: '儲存',
+                              options: FFButtonOptions(
+                                width: buttonWidth,
+                                height: buttonHeight,
+                                padding: EdgeInsetsDirectional.zero,
+                                iconPadding: EdgeInsetsDirectional.zero,
+                                color: Color(0xFFFFAC8F),
+                                textStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
+                                    fontFamily: 'Poppins',
+                                    color: FlutterFlowTheme.of(context).black600,
+                                    fontSize: buttonFontSize,
+                                    fontWeight: FontWeight.bold
+                                ),
+                                elevation: 2.0,
+                                borderSide: BorderSide(
+                                  color: Colors.transparent,
+                                  width: 1.0,
+                                ),
+                                borderRadius: BorderRadius.circular(isLandscape ? 12.0 : 8.0),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/17.jpg',
-                                  '返回',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/18.jpg',
-                                  '使用紀錄',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('documental');
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/19.jpg',
-                                  '新通知',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('notice');
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/20.jpg',
-                                  '關於',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('about');
-                                  }
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                        SizedBox(height: generalPadding), // Ensure space for keyboard
+                      ],
+                    ),
                   ),
-                  // ),
                 ),
-              ],
-            ),
-          ),
+              ),
 
+              // Bottom Navigation Bar - Unchanged as requested
+              Container(
+                width: double.infinity,
+                height: isLandscape ? screenHeight * 0.15 : screenHeight * 0.15,
+                color: FlutterFlowTheme.of(context).primaryBtnText,
+                // padding: EdgeInsets.symmetric(vertical: isLandscape ? screenHeight * 0.01 : screenHeight * 0.015),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildBottomNavItem(context, 'assets/images/17.jpg', '返回', isLandscape,
+                        onTap: () => Navigator.pop(context)),
+                    _buildBottomNavItem(context, 'assets/images/18.jpg', '使用紀錄', isLandscape,
+                        onTap: () => context.pushNamed('documental')),
+                    _buildBottomNavItem(context, 'assets/images/19.jpg', '新通知', isLandscape,
+                        onTap: () => context.pushNamed('notice')),
+                    _buildBottomNavItem(context, 'assets/images/20.jpg', '關於', isLandscape,
+                        onTap: () => context.pushNamed('about')),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+
+  // 橫向模式的表單佈局 - 雙列排列
+  Widget _buildLandscapeFormLayout(BuildContext context, double labelFontSize, double valueFontSize, double itemSpacing, double textFieldHeight, double dropDownWidth, double dropDownHeight) {
+    return Column(
+      children: [
+        // 將表單分為左右兩列，使用 Row 佈局
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 左側列 - 基本信息、生日、年齡、性別、診斷、患側
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDatePickerRow(context, '生日 :', FFAppState().timepicker, (date) {
+                    if (date != null) {
+                      setState(() {
+                        _model.datePicked = date;
+                        FFAppState().timepicker = _model.datePicked;
+                      });
+                    }
+                  }, true, labelFontSize, valueFontSize),
+                  SizedBox(height: itemSpacing),
+
+                  if (FFAppState().timepicker != null)
+                    _buildInfoRow(context, '年齡 :', '${getAge(FFAppState().timepicker as DateTime)} 歲', true, labelFontSize, valueFontSize),
+                  SizedBox(height: itemSpacing),
+
+                  _buildGenderPickerRow(context, '性別 :', FFAppState().gender, (isFemale) {
+                    setState(() {
+                      if (isFemale) {
+                        FFAppState().avatar = FFAppState().imagegirl;
+                        FFAppState().gender = '女';
+                      } else {
+                        FFAppState().avatar = FFAppState().imageboy;
+                        FFAppState().gender = '男';
+                      }
+                    });
+                  }, true, labelFontSize, valueFontSize),
+                  SizedBox(height: itemSpacing),
+
+                  // 診斷與患側放在同一垂直列
+                  _buildDropdownRow(context, '診斷 :', _model.dropDownValueController1, FFAppState().diagnosis, ['左側出血性腦中風', '左側缺血性腦中風', '右側出血性腦中風', '右側缺血性腦中風'], (val) {
+                    setState(() {
+                      _model.dropDownValue1 = val;
+                      FFAppState().diagnosis = _model.dropDownValue1!;
+                    });
+                  }, true, labelFontSize, valueFontSize, dropDownWidth, dropDownHeight),
+                  SizedBox(height: itemSpacing),
+
+                  _buildDropdownRow(context, '患側 :', _model.dropDownValueController2, FFAppState().affectedside, ['左側', '右側'], (val) {
+                    setState(() {
+                      _model.dropDownValue2 = val;
+                      FFAppState().affectedside = _model.dropDownValue2!;
+                    });
+                  }, true, labelFontSize, valueFontSize, dropDownWidth, dropDownHeight),
+                ],
+              ),
+            ),
+            SizedBox(width: MediaQuery.of(context).size.width * 0.03), // 列間距
+            // 右側列 - 聯絡資訊
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 聯絡電話、緊急聯絡人、緊急聯絡人電話、加入日期放在同一垂直列
+                  _buildEditableInfoRow(context, '聯絡電話:', _model.textController3!, (val) => FFAppState().phone = val, '聯絡電話', true, labelFontSize, valueFontSize, textFieldHeight, isPhoneNumber: true),
+                  SizedBox(height: itemSpacing),
+
+                  _buildEditableInfoRow(context, '緊急聯絡人:', _model.textController4!, (val) => FFAppState().urgenname = val, '緊急聯絡人', true, labelFontSize, valueFontSize, textFieldHeight),
+                  SizedBox(height: itemSpacing),
+
+                  _buildEditableInfoRow(context, '緊急聯絡人電話:', _model.textController5!, (val) => FFAppState().nickphone = val, '緊急聯絡人電話', true, labelFontSize, valueFontSize, textFieldHeight, isPhoneNumber: true),
+                  SizedBox(height: itemSpacing),
+
+                  _buildDatePickerRow(context, '加入日期 :', FFAppState().joindate, (date) {
+                    if (date != null) {
+                      setState(() {
+                        _model.datePicked2 = date;
+                        FFAppState().joindate = _model.datePicked2;
+                      });
+                    }
+                  }, true, labelFontSize, valueFontSize),
+                ],
+              ),
+            ),
+          ],
+        ),
+        // 移除底部項目 - 已經移動到右側列
+      ],
+    );
+  }
+
+  // 直向模式的表單佈局 - 單列排列
+  Widget _buildPortraitFormLayout(BuildContext context, double labelFontSize, double valueFontSize, double itemSpacing, double textFieldHeight, double dropDownWidth, double dropDownHeight) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDatePickerRow(context, '生日 :', FFAppState().timepicker, (date) {
+          if (date != null) {
+            setState(() {
+              _model.datePicked = date;
+              FFAppState().timepicker = _model.datePicked;
+            });
+          }
+        }, false, labelFontSize, valueFontSize),
+        SizedBox(height: itemSpacing),
+
+        if (FFAppState().timepicker != null)
+          _buildInfoRow(context, '年齡 :', '${getAge(FFAppState().timepicker as DateTime)} 歲', false, labelFontSize, valueFontSize),
+        SizedBox(height: itemSpacing),
+
+        _buildGenderPickerRow(context, '性別 :', FFAppState().gender, (isFemale) {
+          setState(() {
+            if (isFemale) {
+              FFAppState().avatar = FFAppState().imagegirl;
+              FFAppState().gender = '女';
+            } else {
+              FFAppState().avatar = FFAppState().imageboy;
+              FFAppState().gender = '男';
+            }
+          });
+        }, false, labelFontSize, valueFontSize),
+        SizedBox(height: itemSpacing),
+
+        _buildDropdownRow(context, '診斷 :', _model.dropDownValueController1, FFAppState().diagnosis, ['左側出血性腦中風', '左側缺血性腦中風', '右側出血性腦中風', '右側缺血性腦中風'], (val) {
+          setState(() {
+            _model.dropDownValue1 = val;
+            FFAppState().diagnosis = _model.dropDownValue1!;
+          });
+        }, false, labelFontSize, valueFontSize, dropDownWidth, dropDownHeight),
+        SizedBox(height: itemSpacing),
+
+        _buildDropdownRow(context, '患側 :', _model.dropDownValueController2, FFAppState().affectedside, ['左側', '右側'], (val) {
+          setState(() {
+            _model.dropDownValue2 = val;
+            FFAppState().affectedside = _model.dropDownValue2!;
+          });
+        }, false, labelFontSize, valueFontSize, dropDownWidth, dropDownHeight),
+        SizedBox(height: itemSpacing),
+
+        _buildEditableInfoRow(context, '聯絡電話:', _model.textController3!, (val) => FFAppState().phone = val, '聯絡電話', false, labelFontSize, valueFontSize, textFieldHeight, isPhoneNumber: true),
+        SizedBox(height: itemSpacing),
+        _buildEditableInfoRow(context, '緊急聯絡人:', _model.textController4!, (val) => FFAppState().urgenname = val, '緊急聯絡人', false, labelFontSize, valueFontSize, textFieldHeight),
+        SizedBox(height: itemSpacing),
+        _buildEditableInfoRow(context, '緊急聯絡人電話:', _model.textController5!, (val) => FFAppState().nickphone = val, '緊急聯絡人電話', false, labelFontSize, valueFontSize, textFieldHeight, isPhoneNumber: true),
+        SizedBox(height: itemSpacing),
+
+        _buildDatePickerRow(context, '加入日期 :', FFAppState().joindate, (date) {
+          if (date != null) {
+            setState(() {
+              _model.datePicked2 = date;
+              FFAppState().joindate = _model.datePicked2;
+            });
+          }
+        }, false, labelFontSize, valueFontSize),
+      ],
+    );
+  }
+
+  // Helper widget for non-editable info rows
+  Widget _buildInfoRow(BuildContext context, String label, String value, bool isLandscape, double labelFontSize, double valueFontSize, {bool readOnly = false}) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelWidth = isLandscape ? screenWidth * 0.1 : screenWidth * 0.22;
+
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: labelWidth,
+          child: Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Poppins',
+              fontSize: labelFontSize,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        SizedBox(width: screenWidth * (isLandscape ? 0.01 : 0.02)),
+        Expanded(
+          child: AutoSizeText(
+            value,
+            textAlign: readOnly ? TextAlign.start : TextAlign.center,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Poppins',
+              fontSize: valueFontSize,
+            ),
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper widget for editable info rows (TextFormFields)
+  Widget _buildEditableInfoRow(BuildContext context, String label, TextEditingController controller, Function(String) onSubmitted, String hintText, bool isLandscape, double labelFontSize, double valueFontSize, double fieldHeight, {bool isPhoneNumber = false}) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelWidth = isLandscape ? screenWidth * 0.1 : screenWidth * 0.22;
+
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: labelWidth,
+          child: Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Poppins',
+              fontSize: labelFontSize,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        SizedBox(width: screenWidth * (isLandscape ? 0.01 : 0.02)),
+        Expanded(
+          child: Container(
+            height: fieldHeight,
+            child: TextFormField(
+              controller: controller,
+              onChanged: (_) => EasyDebounce.debounce(
+                'textController_${label.hashCode}', // Unique debounce ID
+                Duration(milliseconds: 1000), // Reduced debounce time
+                    () => setState(() {}),
+              ),
+              onFieldSubmitted: (val) async {
+                setState(() {
+                  onSubmitted(val);
+                });
+              },
+              obscureText: false,
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: FlutterFlowTheme.of(context).bodySmall.override(
+                  fontFamily: 'Poppins',
+                  fontSize: valueFontSize * 0.9,
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Color(0x00000000), width: 1.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: FlutterFlowTheme.of(context).primary, width: 1.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                errorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: FlutterFlowTheme.of(context).error, width: 1.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                focusedErrorBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: FlutterFlowTheme.of(context).error, width: 1.0),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: FlutterFlowTheme.of(context).primaryBackground,
+                contentPadding: EdgeInsetsDirectional.fromSTEB(12.0, 0, 12.0, 0), // Adjusted padding
+                suffixIcon: controller.text.isNotEmpty
+                    ? InkWell(
+                  onTap: () async {
+                    controller.clear();
+                    setState(() {});
+                  },
+                  child: Icon(Icons.clear, color: Color(0xFF757575), size: valueFontSize * 0.8),
+                )
+                    : null,
+              ),
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Poppins',
+                fontSize: valueFontSize,
+              ),
+              textAlign: TextAlign.start,
+              keyboardType: isPhoneNumber ? TextInputType.phone : TextInputType.text,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper widget for DatePicker rows
+  Widget _buildDatePickerRow(BuildContext context, String label, DateTime? currentValue, Function(DateTime?) onDatePicked, bool isLandscape, double labelFontSize, double valueFontSize) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelWidth = isLandscape ? screenWidth * 0.1 : screenWidth * 0.22;
+
+    return InkWell(
+      onTap: () async {
+        final DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: currentValue ?? getCurrentTimestamp,
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2050),
+          builder: (context, child) { // Optional: Theming the date picker
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: ColorScheme.light(
+                  primary: FlutterFlowTheme.of(context).primary, // header background color
+                  onPrimary: Colors.white, // header text color
+                  onSurface: FlutterFlowTheme.of(context).primaryText, // body text color
+                ),
+                textButtonTheme: TextButtonThemeData(
+                  style: TextButton.styleFrom(
+                    foregroundColor: FlutterFlowTheme.of(context).primary, // button text color
+                  ),
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+        onDatePicked(pickedDate);
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Text(
+              label,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Poppins',
+                fontSize: labelFontSize,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              currentValue != null ? dateTimeFormat('yyyy/MM/dd', currentValue) : '請選擇日期',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Poppins',
+                fontSize: valueFontSize,
+                color: currentValue != null ? FlutterFlowTheme.of(context).primaryText : FlutterFlowTheme.of(context).secondaryText,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+            child: Icon(Icons.arrow_forward_ios, color: Colors.black, size: valueFontSize),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper for Gender Picker
+  Widget _buildGenderPickerRow(BuildContext context, String label, String currentValue, Function(bool) onGenderSelected, bool isLandscape, double labelFontSize, double valueFontSize) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelWidth = isLandscape ? screenWidth * 0.1 : screenWidth * 0.22;
+
+    return InkWell(
+      onTap: () async {
+        bool? confirmDialogResponse = await showDialog<bool>(
+          context: context,
+          builder: (alertDialogContext) {
+            return AlertDialog(
+              title: Text('請選擇性別', style: TextStyle(fontSize: labelFontSize * 0.9)),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(alertDialogContext, false), // Male
+                  child: Text('男', style: TextStyle(fontSize: valueFontSize)),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(alertDialogContext, true), // Female
+                  child: Text('女', style: TextStyle(fontSize: valueFontSize)),
+                ),
+              ],
+            );
+          },
+        );
+        if (confirmDialogResponse != null) {
+          onGenderSelected(confirmDialogResponse);
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: labelWidth,
+            child: Text(
+              label,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Poppins',
+                fontSize: labelFontSize,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              currentValue.isNotEmpty ? currentValue : '請選擇性別',
+              textAlign: TextAlign.center,
+              style: FlutterFlowTheme.of(context).bodyMedium.override(
+                fontFamily: 'Poppins',
+                fontSize: valueFontSize,
+                color: currentValue.isNotEmpty ? FlutterFlowTheme.of(context).primaryText : FlutterFlowTheme.of(context).secondaryText,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 10.0, 0.0),
+            child: Icon(Icons.arrow_forward_ios, color: Colors.black, size: valueFontSize),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper widget for Dropdown rows
+  Widget _buildDropdownRow(BuildContext context, String label, FormFieldController<String>? controller, String? currentValue, List<String> options, Function(String?) onChanged, bool isLandscape, double labelFontSize, double valueFontSize, double dropdownWidth, double dropdownHeight) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final labelWidth = isLandscape ? screenWidth * 0.1 : screenWidth * 0.22;
+
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: labelWidth,
+          child: Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Poppins',
+              fontSize: labelFontSize,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        SizedBox(width: screenWidth * (isLandscape ? 0.01 : 0.02)),
+        Expanded(
+          child: FlutterFlowDropDown<String>(
+            controller: controller ??= FormFieldController<String>(currentValue),
+            options: options,
+            onChanged: (val) async {
+              setState(() => onChanged(val));
+            },
+            width: dropdownWidth, // Use responsive width
+            height: dropdownHeight, // Use responsive height
+            textStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Poppins',
+              color: Colors.black,
+              fontSize: valueFontSize,
+            ),
+            hintText: '請做選擇',
+            icon: Icon(Icons.keyboard_arrow_down_rounded, color: FlutterFlowTheme.of(context).secondaryText, size: valueFontSize * 1.2),
+            fillColor: FlutterFlowTheme.of(context).primaryBackground,
+            elevation: 2.0,
+            borderColor: FlutterFlowTheme.of(context).alternate,
+            borderWidth: 1.0,
+            borderRadius: 8.0,
+            margin: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0), // Adjusted margin
+            hidesUnderline: true,
+            isSearchable: false,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildBottomNavItem(
       BuildContext context,
       String imagePath,
       String label,
-      Size screenSize,
-      {VoidCallback? onTap}
-      ) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+      bool isLandscape, // Added
+          {VoidCallback? onTap}) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+
+    final iconContainerSize = isLandscape ? screenHeight * 0.08 : screenWidth * 0.12;
+    final fontSize = isLandscape ? screenHeight * 0.03 : screenWidth * 0.04;
+    final spacing = isLandscape ? screenHeight * 0 : screenWidth * 0;
+
+    return Expanded(
       child: InkWell(
         onTap: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               imagePath,
-              width: screenSize.width * 0.17,
-              height: screenSize.width * 0.15,
+              width: iconContainerSize,
+              height: iconContainerSize,
               fit: BoxFit.contain,
             ),
-            SizedBox(height: 4),
+            SizedBox(height: spacing),
             Text(
               label,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Poppins',
-                fontSize: screenSize.width * 0.04,
+                  fontFamily: 'Poppins',
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold
               ),
               textAlign: TextAlign.center,
             ),

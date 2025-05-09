@@ -252,7 +252,7 @@ class _SettingsMenuWidgetState extends State<SettingsMenuWidget> {
 
     final iconSize = isLandscape
         ? screenSize.height * 0.08
-        : screenSize.width * 0.15;
+        : screenSize.width * 0.12;
 
     final fontSize = isLandscape
         ? screenSize.height * 0.03

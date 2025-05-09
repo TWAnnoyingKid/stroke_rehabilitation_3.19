@@ -66,7 +66,7 @@ class _VideoAppState extends State<VideoApp> {
                 borderRadius: BorderRadius.all(Radius.circular(15.0)),
               ),
               child: Text(
-                "左邊按鈕暫停與重播影片\n右邊按鈕開始復健!",
+                "上方按鈕暫停與重播影片\n下方按鈕開始復健!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: instructionFontSize,

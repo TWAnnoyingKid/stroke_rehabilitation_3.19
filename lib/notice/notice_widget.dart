@@ -213,13 +213,13 @@ class _NoticeWidgetState extends State<NoticeWidget> {
               // Fixed Bottom Navigation Bar
               Container(
                 width: double.infinity,
-                height: isLandscape ? screenHeight * 0.18 : screenHeight * 0.15,
+                height: isLandscape ? screenHeight * 0.15 : screenHeight * 0.15,
                 color: FlutterFlowTheme.of(context).primaryBtnText,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildBottomNavItem(context, 'assets/images/17.jpg', '返回',
+                    _buildBottomNavItem(context, 'assets/images/17.jpg', '主頁',
                         onTap: () => context.pushNamed('home')),
                     _buildBottomNavItem(context, 'assets/images/18.jpg', '使用紀錄',
                         onTap: () => context.pushNamed('documental')),

@@ -242,7 +242,7 @@ class _TrainWidgetState extends State<TrainWidget> {
               // 底部固定導航欄
               Container(
                 width: double.infinity,
-                height: isLandscape ? screenHeight * 0.18 : screenHeight * 0.15, // Adjusted height for landscape
+                height: isLandscape ? screenHeight * 0.15 : screenHeight * 0.15, // Adjusted height for landscape
                 color: FlutterFlowTheme.of(context).primaryBtnText,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
