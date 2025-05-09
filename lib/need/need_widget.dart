@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'need_model.dart';
 export 'need_model.dart';
 import 'package:audioplayers/audioplayers.dart';//播放音檔
+
 class NeedWidget extends StatefulWidget {
   const NeedWidget({Key? key}) : super(key: key);
 
@@ -31,7 +32,6 @@ class _NeedWidgetState extends State<NeedWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     _unfocusNode.dispose();
     super.dispose();
   }
@@ -40,272 +40,200 @@ class _NeedWidgetState extends State<NeedWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
     final screenSize = MediaQuery.of(context).size;
-    // Calculate responsive values
-    final double iconSize = screenSize.width * 0.15;
-    final double fontSize = screenSize.width * 0.04;
-    final double cardButtonFontSize = screenSize.width < 400 ? 20.0 : 30.0;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
+        backgroundColor: Color(0xFFFFC1A1),
         body: SafeArea(
-          // Use SingleChildScrollView to wrap the entire content including navigation
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                // Main content container
-                Container(
-                  width: double.infinity,
-                  color: Color(0xFFFFC1A1),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 頂部標題區域
+              _buildPageHeader(context, '需求表達', 'assets/images/00.png'),
 
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header with title
-                      Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  15.0, 0.0, 0.0, 0.0),
-                              child: Image.asset(
-                                'assets/images/00.png',
-                                width: iconSize,
-                                height: iconSize,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  20.0, 0.0, 0.0, 0.0),
-                              child: Text(
-                                '需求表達',
-                                textAlign: TextAlign.start,
-                                style: FlutterFlowTheme.of(context)
-                                    .displaySmall
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: fontSize * 1.8,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Grid layout
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        child: GridView.count(
-                          crossAxisCount: screenSize.width < 600 ? 2 : 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 15,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          children: [
-                            _buildGridItem(
-                                context,
-                                'assets/images/01.png',
-                                '肚子餓',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/5.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/02.png',
-                                '口渴',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/2.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/03.png',
-                                '小號',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/4.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/04.png',
-                                '大號',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/3.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/05.png',
-                                '換尿布',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/8.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/06.png',
-                                '翻身',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/12.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/07.png',
-                                '很熱',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/7.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/08.png',
-                                '很冷',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/6.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/10.png',
-                                '頭痛',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/10.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/11.png',
-                                '腹痛身',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/9.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/12.png',
-                                '下床',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/1.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                            _buildGridItem(
-                                context,
-                                'assets/images/09.png',
-                                '頭暈',
-                                onTap: () async {
-                                  _audioPlayer.play(AssetSource('audios/11.mp3'));
-                                },
-                                constraints: BoxConstraints(maxWidth: screenSize.width),
-                                fontSize: cardButtonFontSize
-                            ),
-                          ],
-
-                        ),
-                      ),
-                    ],
+              // 中間內容區域 (可滾動)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.infinity,
+                    child: _buildGridLayout(context, screenSize, isLandscape),
                   ),
                 ),
+              ),
 
-                // Bottom navigation - now included within the SingleChildScrollView
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/17.jpg',
-                            '返回',
-                            screenSize*1.5,
-                            onTap: () {
-                              Navigator.pop(context);
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/18.jpg',
-                            '使用紀錄',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('documental');
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/19.jpg',
-                            '新通知',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('notice');
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/20.jpg',
-                            '關於',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('about');
-                            }
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              // 底部導航欄
+              _buildBottomNavBar(context),
+            ],
           ),
         ),
       ),
     );
   }
-// Helper method to build grid items
+
+  // 需求表達網格佈局
+  Widget _buildGridLayout(BuildContext context, Size screenSize, bool isLandscape) {
+    // 根據方向調整每行顯示的項目數
+    final crossAxisCount = isLandscape ? 4 : 2;
+    final childAspectRatio = isLandscape ? 0.8 : 0.9;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+          horizontal: screenSize.width * 0.03,
+          vertical: screenSize.height * 0.02
+      ),
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: screenSize.width * 0.02,
+        mainAxisSpacing: screenSize.height * 0.02,
+        childAspectRatio: childAspectRatio,
+        children: [
+          _buildGridItem(
+            context,
+            'assets/images/01.png',
+            '肚子餓',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/5.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/02.png',
+            '口渴',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/2.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/03.png',
+            '小號',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/4.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/04.png',
+            '大號',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/3.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/05.png',
+            '換尿布',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/8.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/06.png',
+            '翻身',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/12.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/07.png',
+            '很熱',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/7.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/08.png',
+            '很冷',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/6.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/10.png',
+            '頭痛',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/10.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/11.png',
+            '腹痛身',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/9.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/12.png',
+            '下床',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/1.mp3'));
+            },
+          ),
+          _buildGridItem(
+            context,
+            'assets/images/09.png',
+            '頭暈',
+            screenSize,
+            isLandscape,
+            onTap: () async {
+              _audioPlayer.play(AssetSource('audios/11.mp3'));
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 網格項目
   Widget _buildGridItem(
       BuildContext context,
       String imagePath,
       String label,
-      {required VoidCallback onTap,
-        required BoxConstraints constraints,
-        required double fontSize}
+      Size screenSize,
+      bool isLandscape,
+      {required VoidCallback onTap}
       ) {
-    final double itemWidth = constraints.maxWidth * 0.25;
-    final double imageHeight = constraints.maxHeight * 0.12;
+    final imageSize = isLandscape
+        ? screenSize.height * 0.15
+        : screenSize.width * 0.25;
+
+    final fontSize = isLandscape
+        ? screenSize.height * 0.03
+        : screenSize.width * 0.05;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -317,25 +245,21 @@ class _NeedWidgetState extends State<NeedWidget> {
           highlightColor: Colors.transparent,
           onTap: onTap,
           child: Container(
-            constraints: BoxConstraints(
-              maxWidth: itemWidth,
-              maxHeight: imageHeight,
-            ),
+            width: imageSize,
+            height: imageSize,
             child: Image.asset(
               imagePath,
               fit: BoxFit.contain,
             ),
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: screenSize.height * 0.01),
         FFButtonWidget(
-          onPressed: () {
-            print('Button pressed ...');
-          },
+          onPressed: onTap,
           text: label,
           options: FFButtonOptions(
-            width: itemWidth,
-            height: 40.0,
+            width: isLandscape ? screenSize.width * 0.1 : screenSize.width * 0.25,
+            height: isLandscape ? 40.0 : 40.0,
             padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
             iconPadding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
             color: FlutterFlowTheme.of(context).primaryBtnText,
@@ -355,33 +279,152 @@ class _NeedWidgetState extends State<NeedWidget> {
     );
   }
 
-// 创建导航按钮的辅助方法
-  Widget _buildBottomNavItem(
+  // 統一的頁面標題區域
+  Widget _buildPageHeader(
+      BuildContext context,
+      String title,
+      String imagePath
+      ) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final containerHeight = isLandscape
+        ? screenSize.height * 0.15
+        : screenSize.height * 0.1;
+
+    final iconSize = isLandscape
+        ? screenSize.height * 0.1
+        : screenSize.width * 0.15;
+
+    final titleFontSize = isLandscape
+        ? screenSize.height * 0.07
+        : screenSize.width * 0.08;
+
+    return Container(
+      width: double.infinity,
+      height: containerHeight,
+      color: Color(0xFFFFC1A1), // 保持與頁面主色調一致
+      padding: EdgeInsets.symmetric(
+          vertical: screenSize.height * 0.01,
+          horizontal: screenSize.width * 0.02
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+                screenSize.width * 0.03, 0.0, 0.0, 0.0),
+            child: Image.asset(
+              imagePath,
+              width: iconSize,
+              height: iconSize,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+                screenSize.width * 0.04, 0.0, 0.0, 0.0),
+            child: Text(
+              title,
+              textAlign: TextAlign.start,
+              style: FlutterFlowTheme.of(context)
+                  .displaySmall
+                  .override(
+                fontFamily: 'Poppins',
+                fontSize: titleFontSize,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 統一的底部導航欄
+  Widget _buildBottomNavBar(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final navBarHeight = isLandscape
+        ? screenSize.height * 0.15
+        : screenSize.height * 0.15;
+
+    return Container(
+      width: double.infinity,
+      height: navBarHeight,
+      color: FlutterFlowTheme.of(context).primaryBtnText,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildNavItem(
+              context,
+              'assets/images/17.jpg',
+              '返回',
+              onTap: () => Navigator.pop(context)
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/18.jpg',
+              '使用紀錄',
+              onTap: () => context.pushNamed('documental')
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/19.jpg',
+              '新通知',
+              onTap: () => context.pushNamed('notice')
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/20.jpg',
+              '關於',
+              onTap: () => context.pushNamed('about')
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 統一的導航項目
+  Widget _buildNavItem(
       BuildContext context,
       String imagePath,
       String label,
-      Size screenSize,
       {VoidCallback? onTap}
       ) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final iconSize = isLandscape
+        ? screenSize.height * 0.08
+        : screenSize.width * 0.15;
+
+    final fontSize = isLandscape
+        ? screenSize.height * 0.03
+        : screenSize.width * 0.04;
+
+    return Expanded(
       child: InkWell(
         onTap: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               imagePath,
-              width: screenSize.width * 0.17,
-              height: screenSize.width * 0.15,
+              width: iconSize,
+              height: iconSize,
               fit: BoxFit.contain,
             ),
-            SizedBox(height: 4),
+            SizedBox(height: screenSize.height * 0.005),
             Text(
               label,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                 fontFamily: 'Poppins',
-                fontSize: screenSize.width * 0.04,
+                fontSize: fontSize,
               ),
               textAlign: TextAlign.center,
             ),

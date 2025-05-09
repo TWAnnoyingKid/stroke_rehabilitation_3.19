@@ -40,429 +40,342 @@ class _TrainWidgetState extends State<TrainWidget> {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
     final screenHeight = screenSize.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     // 計算自適應字體大小和按鈕大小
-    final titleFontSize = screenWidth * 0.08 > 50 ? 50.0 : screenWidth * 0.08;
-    final buttonFontSize = screenWidth * 0.06 > 35 ? 35.0 : screenWidth * 0.06;
-    final buttonHeight = screenHeight * 0.12 > 100 ? 100.0 : screenHeight * 0.12;
-    final imageSize = screenHeight * 0.09 > 90 ? 90.0 : screenHeight * 0.09;
+    final titleFontSize = isLandscape ? screenHeight * 0.07 : screenWidth * 0.08;
+    final buttonTextFontSize = isLandscape ? screenHeight * 0.05 : screenWidth * 0.07;
+    final buttonHeight = isLandscape ? screenHeight * 0.20 : screenHeight * 0.12;
+    final buttonImageSize = isLandscape ? screenHeight * 0.1 : screenWidth * 0.12;
+    final mainButtonPadding = isLandscape ? screenHeight * 0.02 : screenHeight * 0.02;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
+        backgroundColor: Color(0xFF90BDF9),
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: double.infinity,
-                  constraints: BoxConstraints(
-                    minHeight: screenHeight * 0.9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 1.0,
-                        constraints: BoxConstraints(
-                          minHeight: screenHeight * 0.75,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF90BDF9),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        15.0, 0.0, 0.0, 0.0),
-                                    child: Image.asset(
-                                      'assets/images/22.png',
-                                      width: screenSize.width * 0.15,
-                                      height: screenSize.width * 0.15,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.fromSTEB(
-                                        20.0, 0.0, 0.0, 0.0),
-                                    child: Text(
-                                      '復健訓練',
-                                      textAlign: TextAlign.start,
-                                      style: FlutterFlowTheme.of(context)
-                                          .displaySmall
-                                          .override(
-                                        fontFamily: 'Poppins',
-                                        fontSize: titleFontSize,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                // 上肢訓練按鈕
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                        child: Container(
-                                          width: screenSize.width * 0.9,
-                                          height: screenSize.width * 0.2,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF4DB60),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(5.0, 15.0),
-                                              )
-                                            ],
-                                            borderRadius: BorderRadius.circular(40.0),
-                                          ),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed('trainupperbody');
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '上肢訓練',
-                                                  style: FlutterFlowTheme.of(context).displaySmall.override(
-                                                    fontFamily: 'Poppins',
-                                                    color: Color(0xFFC50D1C),
-                                                    fontSize: screenSize.width * 0.12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
-                                                  child: Image.asset(
-                                                    'assets/images/13.png',
-                                                      width: screenSize.width * 0.15,
-                                                      height: screenSize.width * 0.15,
-                                                      fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // 下肢訓練按鈕
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                        child: Container(
-                                          width: screenSize.width * 0.9,
-                                          height: screenSize.width * 0.2,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF4DB60),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(5.0, 15.0),
-                                              )
-                                            ],
-                                            borderRadius: BorderRadius.circular(40.0),
-                                          ),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed('trainlowerbody');
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '下肢訓練',
-                                                  style: FlutterFlowTheme.of(context).displaySmall.override(
-                                                    fontFamily: 'Poppins',
-                                                    color: Color(0xFFC50D1C),
-                                                    fontSize: screenSize.width * 0.12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
-                                                  child: Image.asset(
-                                                    'assets/images/14.png',
-                                                    width: screenSize.width * 0.15,
-                                                    height: screenSize.width * 0.15,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // 口腔動作按鈕
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                        child: Container(
-                                          width: screenSize.width * 0.9,
-                                          height: screenSize.width * 0.2,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF4DB60),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(5.0, 15.0),
-                                              )
-                                            ],
-                                            borderRadius: BorderRadius.circular(40.0),
-                                          ),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              context.pushNamed('trainmouth');
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '口腔訓練',
-                                                  style: FlutterFlowTheme.of(context).displaySmall.override(
-                                                    fontFamily: 'Poppins',
-                                                    color: Color(0xFFC50D1C),
-                                                    fontSize: screenSize.width * 0.12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
-                                                  child: Image.asset(
-                                                    'assets/images/15.png',
-                                                    width: screenSize.width * 0.15,
-                                                    height: screenSize.width * 0.15,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // 口腔動作按鈕
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(0.0, 20.0, 0.0, 0.0),
-                                        child: Container(
-                                          width: screenSize.width * 0.9,
-                                          height: screenSize.width * 0.2,
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFFF4DB60),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                blurRadius: 4.0,
-                                                color: Color(0x33000000),
-                                                offset: Offset(5.0, 15.0),
-                                              )
-                                            ],
-                                            borderRadius: BorderRadius.circular(40.0),
-                                          ),
-                                          child: InkWell(
-                                            splashColor: Colors.transparent,
-                                            focusColor: Colors.transparent,
-                                            hoverColor: Colors.transparent,
-                                            highlightColor: Colors.transparent,
-                                            onTap: () async {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => const RsstIntroPage(),
-                                                ),
-                                              );
-                                            },
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '復健成效測驗',
-                                                  style: FlutterFlowTheme.of(context).displaySmall.override(
-                                                    fontFamily: 'Poppins',
-                                                    color: Color(0xFFC50D1C),
-                                                    fontSize: screenSize.width * 0.12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 0.0, 0.0),
-                                                  child: Image.asset(
-                                                    'assets/images/15.png',
-                                                    width: screenSize.width * 0.15,
-                                                    height: screenSize.width * 0.15,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 固定標題區域
+              Container(
+                width: double.infinity,
+                height: isLandscape ? screenHeight * 0.15 : screenHeight * 0.1,
+                color: Color(0xFF90BDF9),
+                padding: EdgeInsets.symmetric(
+                    vertical: isLandscape ? screenHeight * 0.01 : screenHeight * 0.01),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          screenWidth * 0.03, 0.0, 0.0, 0.0),
+                      child: Image.asset(
+                        'assets/images/22.png',
+                        width: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
+                        height: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          screenWidth * 0.04, 0.0, 0.0, 0.0),
+                      child: Text(
+                        '復健訓練',
+                        textAlign: TextAlign.start,
+                        style: FlutterFlowTheme.of(context)
+                            .displaySmall
+                            .override(
+                          fontFamily: 'Poppins',
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
+                    ),
+                  ],
+                ),
+              ),
+              // 中間內容區域 (可滾動)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(isLandscape ? screenWidth * 0.05 : screenWidth * 0.03),
+                    child: isLandscape
+                        ? Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/17.jpg',
-                                  '返回',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  }
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildTrainingButton(
+                                      context: context,
+                                      title: '上肢訓練',
+                                      imagePath: 'assets/images/13.png',
+                                      onTap: () => context.pushNamed('trainupperbody'),
+                                      screenSize: screenSize,
+                                      isLandscape: true,
+                                      buttonHeight: buttonHeight,
+                                      buttonTextFontSize: buttonTextFontSize,
+                                      buttonImageSize: buttonImageSize,
+                                      paddingBottom: mainButtonPadding,
+                                    ),
+                                    _buildTrainingButton(
+                                      context: context,
+                                      title: '口腔訓練',
+                                      imagePath: 'assets/images/15.png',
+                                      onTap: () => context.pushNamed('trainmouth'),
+                                      screenSize: screenSize,
+                                      isLandscape: true,
+                                      buttonHeight: buttonHeight,
+                                      buttonTextFontSize: buttonTextFontSize,
+                                      buttonImageSize: buttonImageSize,
+                                      paddingBottom: 0, // No padding for the last button in the column
+                                    ),
+                                  ],
+                                ),
                               ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/18.jpg',
-                                  '使用紀錄',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('documental');
-                                  }
+                              SizedBox(width: screenWidth * 0.05), // Space between columns
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildTrainingButton(
+                                      context: context,
+                                      title: '下肢訓練',
+                                      imagePath: 'assets/images/14.png',
+                                      onTap: () => context.pushNamed('trainlowerbody'),
+                                      screenSize: screenSize,
+                                      isLandscape: true,
+                                      buttonHeight: buttonHeight,
+                                      buttonTextFontSize: buttonTextFontSize,
+                                      buttonImageSize: buttonImageSize,
+                                      paddingBottom: mainButtonPadding,
+                                    ),
+                                    _buildTrainingButton(
+                                      context: context,
+                                      title: '復健成效測驗',
+                                      imagePath: 'assets/images/15.png', // Consider a different icon for tests
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const RsstIntroPage(),
+                                        ),
+                                      ),
+                                      screenSize: screenSize,
+                                      isLandscape: true,
+                                      buttonHeight: buttonHeight,
+                                      buttonTextFontSize: buttonTextFontSize,
+                                      buttonImageSize: buttonImageSize,
+                                      paddingBottom: 0, // No padding for the last button in the column
+                                    ),
+                                  ],
+                                ),
                               ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/19.jpg',
-                                  '新通知',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('notice');
-                                  }
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildTrainingButton(
+                                context: context,
+                                title: '上肢訓練',
+                                imagePath: 'assets/images/13.png',
+                                onTap: () => context.pushNamed('trainupperbody'),
+                                screenSize: screenSize,
+                                isLandscape: false,
+                                buttonHeight: buttonHeight,
+                                buttonTextFontSize: buttonTextFontSize,
+                                buttonImageSize: buttonImageSize,
+                                paddingBottom: mainButtonPadding,
                               ),
-                              _buildBottomNavItem(
+                              _buildTrainingButton(
+                                context: context,
+                                title: '下肢訓練',
+                                imagePath: 'assets/images/14.png',
+                                onTap: () => context.pushNamed('trainlowerbody'),
+                                screenSize: screenSize,
+                                isLandscape: false,
+                                buttonHeight: buttonHeight,
+                                buttonTextFontSize: buttonTextFontSize,
+                                buttonImageSize: buttonImageSize,
+                                paddingBottom: mainButtonPadding,
+                              ),
+                              _buildTrainingButton(
+                                context: context,
+                                title: '口腔訓練',
+                                imagePath: 'assets/images/15.png',
+                                onTap: () => context.pushNamed('trainmouth'),
+                                screenSize: screenSize,
+                                isLandscape: false,
+                                buttonHeight: buttonHeight,
+                                buttonTextFontSize: buttonTextFontSize,
+                                buttonImageSize: buttonImageSize,
+                                paddingBottom: mainButtonPadding,
+                              ),
+                              _buildTrainingButton(
+                                context: context,
+                                title: '復健成效測驗',
+                                imagePath: 'assets/images/15.png', // Consider a different icon for tests
+                                onTap: () => Navigator.push(
                                   context,
-                                  'assets/images/20.jpg',
-                                  '關於',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('about');
-                                  }
+                                  MaterialPageRoute(
+                                    builder: (context) => const RsstIntroPage(),
+                                  ),
+                                ),
+                                screenSize: screenSize,
+                                isLandscape: false,
+                                buttonHeight: buttonHeight,
+                                buttonTextFontSize: buttonTextFontSize,
+                                buttonImageSize: buttonImageSize,
+                                paddingBottom: 0, // No padding for the last button
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              // 底部固定導航欄
+              Container(
+                width: double.infinity,
+                height: isLandscape ? screenHeight * 0.18 : screenHeight * 0.15, // Adjusted height for landscape
+                color: FlutterFlowTheme.of(context).primaryBtnText,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildBottomNavItem(context, 'assets/images/17.jpg', '返回',
+                        onTap: () => Navigator.pop(context)),
+                    _buildBottomNavItem(context, 'assets/images/18.jpg', '使用紀錄',
+                        onTap: () => context.pushNamed('documental')),
+                    _buildBottomNavItem(context, 'assets/images/19.jpg', '新通知',
+                        onTap: () => context.pushNamed('notice')),
+                    _buildBottomNavItem(context, 'assets/images/20.jpg', '關於',
+                        onTap: () => context.pushNamed('about')),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildBottomNavItem(
-      BuildContext context,
-      String imagePath,
-      String label,
-      Size screenSize,
-      {VoidCallback? onTap}
-      ) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+Widget _buildTrainingButton({
+  required BuildContext context,
+  required String title,
+  required String imagePath,
+  required VoidCallback onTap,
+  required Size screenSize,
+  required bool isLandscape,
+  required double buttonHeight,
+  required double buttonTextFontSize,
+  required double buttonImageSize,
+  required double paddingBottom,
+}) {
+  final screenWidth = screenSize.width;
+  return Padding(
+    padding: EdgeInsets.only(bottom: paddingBottom),
+    child: Container(
+      width: isLandscape ? double.infinity : screenWidth * 0.9,
+      height: buttonHeight,
+      decoration: BoxDecoration(
+        color: Color(0xFFF4DB60),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 4.0,
+            color: Color(0x33000000),
+            offset: Offset(5.0, 15.0),
+          )
+        ],
+        borderRadius: BorderRadius.circular(15.0),
+      ),
       child: InkWell(
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              imagePath,
-              width: screenSize.width * 0.17,
-              height: screenSize.width * 0.15,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Poppins',
-                fontSize: screenSize.width * 0.04,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: isLandscape ? screenSize.width * 0.02 : screenWidth * 0.05),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image.asset(
+                imagePath,
+                width: buttonImageSize,
+                height: buttonImageSize,
+                fit: BoxFit.contain,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              SizedBox(width: screenWidth * 0.03),
+              Expanded(
+                child: Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: FlutterFlowTheme.of(context).displaySmall.override(
+                        fontFamily: 'Poppins',
+                        color: Color(0xFFC50D1C),
+                        fontSize: buttonTextFontSize,
+                        fontWeight: FontWeight.w600,
+                      ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildBottomNavItem(
+    BuildContext context,
+    String imagePath,
+    String label,
+    {VoidCallback? onTap}
+    ) {
+  final screenSize = MediaQuery.of(context).size;
+  final screenWidth = screenSize.width;
+  final screenHeight = screenSize.height;
+  final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+  final iconWidth = isLandscape ? screenHeight * 0.08 : screenWidth * 0.12;
+  final iconHeight = isLandscape ? screenHeight * 0.08 : screenWidth * 0.12;
+  final fontSize = isLandscape ? screenHeight * 0.03 : screenWidth * 0.04;
+
+  return Expanded(
+    child: InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            width: iconWidth,
+            height: iconHeight,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(height: screenHeight * 0.005),
+          Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Poppins',
+                  fontSize: fontSize,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
 }

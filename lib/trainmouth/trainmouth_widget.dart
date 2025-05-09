@@ -53,63 +53,56 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
     final screenSize = MediaQuery.of(context).size;
     final screenWidth = screenSize.width;
     final screenHeight = screenSize.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    gettime1 = dateTimeFormat('yyyy-M-d', gettime); //轉換輸出型態月日年轉年月日
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
+        backgroundColor: Color(0xFF90BDF9),
         body: SafeArea(
-          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+              // 固定標題區域
               Container(
               width: double.infinity,
-              constraints: BoxConstraints(
-                minHeight: screenHeight * 0.9,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 1.0,
-                    constraints: BoxConstraints(
-                      minHeight: screenHeight * 0.75,
-                    ),
-                    decoration: BoxDecoration(
+                height: isLandscape
+                    ? screenHeight * 0.15
+                    : screenHeight * 0.1, // 根據方向設置不同的高度比例
                       color: Color(0xFF90BDF9),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: EdgeInsets.symmetric(
+                    vertical: isLandscape ? screenHeight * 0.01 : screenHeight * 0.01),
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    15.0, 0.0, 0.0, 0.0),
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          screenWidth * 0.03, 0.0, 0.0, 0.0),
                                 child: Image.asset(
-                                  'assets/images/14.png',
-                                  width: screenSize.width * 0.15,
-                                  height: screenSize.width * 0.15,
+                        'assets/images/14.png', // Placeholder for mouth training icon
+                        width: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
+                        height: isLandscape ? screenHeight * 0.1 : screenWidth * 0.15,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsetsDirectional.fromSTEB(
-                                    20.0, 0.0, 0.0, 0.0),
+                      padding: EdgeInsetsDirectional.fromSTEB(
+                          screenWidth * 0.04, 0.0, 0.0, 0.0),
                                 child: Text(
-                                  '初階訓練',
+                        '口腔訓練',
                                   textAlign: TextAlign.start,
                                   style: FlutterFlowTheme.of(context)
                                       .displaySmall
                                       .override(
                                     fontFamily: 'Poppins',
-                                    fontSize: screenSize.width * 0.08,
+                          fontSize: isLandscape
+                              ? screenHeight * 0.07  // 橫向時使用螢幕高度比例
+                              : screenWidth * 0.08, // 直向時使用螢幕寬度比例
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -118,89 +111,264 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                           ),
                         ),
 
-
-                            // Expanded(
-                            //   child: SingleChildScrollView(//允許 Column 內容可滾動
-                            //     child: Column(
-                            //       children: [
-                            //         Container(
-                            //           width: MediaQuery.of(context).size.width,
-                            //           decoration: BoxDecoration(
-                            //             color: Color(0xFF90BDF9),
-                            //           ),
-                            //           child: Column(
-                            //             children: [
-                            //               Padding(
-                            //                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                            //                 child: Wrap(//自動換行
-                            //                   spacing: 60,// 垂直間距
-                            //                   runSpacing: 20,// 垂直間距
-                            //                   alignment: WrapAlignment.start,//讓按鈕置中對齊
-                            //                   children: List.generate(12, (index) {//生成按鈕
-                            //                     //  定義圖片
-                            //                     List<String> buttonLabels = [
-                            //                       '抿唇動作', '臉頰微笑', '吐舌頭式', '嘟嘴式', '張嘴說阿',
-                            //                       '彈舌式', '頭頸側彎', '下巴運動', '發音練習', '頭部轉向', '肩部上下', '唾液腺'
-                            //                     ];
-                            //
-                            //                     List<int> detectNumbers = [6, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12];
-                            //                     //  設定圖片
-                            //                     List<String> imagePaths = [
-                            //                       'assets/images/57.png', // 抿唇動作
-                            //                       'assets/images/44.png', // 臉頰微笑
-                            //                       'assets/images/45.png', // 吐舌頭式
-                            //                       'assets/images/55.png', // 嘟嘴式
-                            //                       'assets/images/56.png', // 張嘴說阿
-                            //                       'assets/images/46.png', // 彈舌式
-                            //                       'assets/images/54.png', // 頭頸側彎
-                            //                       'assets/images/53.png', // 下巴運動
-                            //                       'assets/images/58.png', // 發音練習
-                            //                       'assets/images/59.png', // 頭部左右轉向
-                            //                       'assets/images/60.png', // 肩部
-                            //                       'assets/images/60.png',
-                            //                     ];
-                            //
-                            //                     return GestureDetector(
-                            //                       onTap: () async {
-                            //                         setState(() {
-                            //                           Face_Detect_Number = detectNumbers[index];
-                            //                           FFAppState().mouth = buttonLabels[index];
-                            //                         });
-                            //                         inputtime();
-                            //                       },
-                            //                       child: Column(
-                            //                         children: [
-                            //                           Image.asset(
-                            //                             imagePaths[index], //  設定的圖片
-                            //                             width: MediaQuery.of(context).size.width * 0.3,
-                            //                             height: MediaQuery.of(context).size.height * 0.15,
-                            //                             fit: BoxFit.fill,
-                            //                           ),
-                            //                           Text(
-                            //                             buttonLabels[index],
-                            //                             style: FlutterFlowTheme.of(context)
-                            //                                 .bodyMedium
-                            //                                 .override(
-                            //                               fontFamily: 'Poppins',
-                            //                               fontSize: 28,//文字大小
-                            //                               fontWeight: FontWeight.w600,
-                            //                             ),
-                            //                           ),
-                            //                         ],
-                            //                       ),
-                            //                     );
-                            //                   }),
-                            //                 ),
-                            //               ),
-                            //             ],
-                            //           ),
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
-
-
+              // 中間內容區域 (可滾動)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: double.infinity,
+                    child: isLandscape
+                    // 橫向模式
+                        ? Padding(
+                      padding: EdgeInsets.all(screenWidth * 0.03),
+                      child: Column(
+                        children: [
+                          // 第一排 (3個訓練)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/57.png',
+                                title: '抿唇動作',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 6; //抿唇動作
+                                    FFAppState().mouth = '抿唇動作';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/44.png',
+                                title: '臉頰微笑',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 1; //微笑動作
+                                    FFAppState().mouth = '臉頰微笑';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/46.png',
+                                title: '彈舌式',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 5;
+                                    FFAppState().mouth = '彈舌式';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          // 第二排 (3個訓練)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/53.png',
+                                title: '下巴運動',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 8;
+                                    FFAppState().mouth = '下巴運動';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/55.png',
+                                title: '嘟嘴式',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 3;
+                                    FFAppState().mouth = '嘟嘴式';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/yawning.png',
+                                title: '張嘴說阿',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 4;
+                                    FFAppState().mouth = '張嘴說阿';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                            ],
+                          ),
+                           SizedBox(height: screenHeight * 0.02),
+                          // 第三排 (3個訓練)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/54.png',
+                                title: '頭頸側彎',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 7;
+                                    FFAppState().mouth = '頭頸側彎';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/45.png',
+                                title: '吐舌頭式',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 2;
+                                    FFAppState().mouth = '吐舌頭式';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/56.png',
+                                title: '發音練習',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 9;
+                                    FFAppState().mouth = '發音練習';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenHeight * 0.02),
+                          // 第四排 (3個訓練)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/59.png',
+                                title: '頭部轉向',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 10;
+                                    FFAppState().mouth = '頭部轉向';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/28.png', // Placeholder, might need a specific icon
+                                title: '肩部上下',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 11;
+                                    FFAppState().mouth = '肩部上下';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/salivary-glands.png',
+                                title: '唾液腺',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 12;
+                                    FFAppState().mouth = '唾液腺';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                            ],
+                          ),
+                           SizedBox(height: screenHeight * 0.02),
+                          // 第五排 (2個訓練)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/upset.png',
+                                title: '臉頰鼓起',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 13;
+                                    FFAppState().mouth = '臉頰鼓起';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/tongue-depressor.png',
+                                title: '舌頂舌板',
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () async {
+                                  setState(() {
+                                    Face_Detect_Number = 14;
+                                    FFAppState().mouth = '舌頂舌板';
+                                  });
+                                  inputtime();
+                                },
+                              ),
+                              // Empty container to balance the row if only 2 items
+                              _buildExerciseItem(
+                                context: context,
+                                imagePath: 'assets/images/transparent.png', // Path to a transparent image
+                                title: '', // Empty title
+                                screenSize: screenSize,
+                                isLandscape: true,
+                                onTap: () {}, // No action on tap
+                                isPlaceholder: true, // Flag to indicate this is a placeholder
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                    // 直向模式 (保持原始布局)
+                        : Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
                             Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
@@ -601,7 +769,7 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                             inputtime();
                                           },
                                           child: Image.asset(
-                                            'assets/images/28.png',
+                                        'assets/images/28.png', // Placeholder, might need a specific icon
                                             width: screenSize.width * 0.35,
                                             height: screenSize.width * 0.35,
                                             fit: BoxFit.fill,
@@ -737,20 +905,24 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
+                ),
+              ),
+
+              // 底部固定導航欄
+              Container(
+                width: double.infinity,
+                height: isLandscape
+                    ? screenHeight * 0.15
+                    : screenHeight * 0.15,  // 根據方向設置高度比例
+                color: FlutterFlowTheme.of(context).primaryBtnText,
                           child: Row(
-                            mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               _buildBottomNavItem(
                                   context,
                                   'assets/images/17.jpg',
                                   '返回',
-                                  screenSize*1.5,
                                   onTap: () {
                                     Navigator.pop(context);
                                   }
@@ -759,7 +931,6 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                   context,
                                   'assets/images/18.jpg',
                                   '使用紀錄',
-                                  screenSize*1.5,
                                   onTap: () {
                                     context.pushNamed('documental');
                                   }
@@ -768,7 +939,6 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                   context,
                                   'assets/images/19.jpg',
                                   '新通知',
-                                  screenSize*1.5,
                                   onTap: () {
                                     context.pushNamed('notice');
                                   }
@@ -777,52 +947,124 @@ class _TrainmouthWidgetState extends State<TrainmouthWidget> {
                                   context,
                                   'assets/images/20.jpg',
                                   '關於',
-                                  screenSize*1.5,
                                   onTap: () {
                                     context.pushNamed('about');
                                   }
                               ),
                             ],
-                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-            ],
-          ),
-        ),
-      ),
       ),
     );
   }
 }
+
+// 訓練項目組件 (橫向模式專用)
+Widget _buildExerciseItem({
+  required BuildContext context,
+  required String imagePath,
+  required String title,
+  required Size screenSize,
+  required bool isLandscape,
+  required VoidCallback onTap,
+  bool isPlaceholder = false, // Added isPlaceholder parameter with a default value
+}) {
+  final screenWidth = screenSize.width;
+  final screenHeight = screenSize.height;
+
+  final imageSize = isLandscape
+      ? screenHeight * 0.2 // Adjusted for potentially more items
+      : screenWidth * 0.35;
+
+  final fontSize = isLandscape
+      ? screenHeight * 0.04 // Adjusted for potentially more items
+      : screenWidth * 0.08;
+
+  if (isPlaceholder) {
+    // Return a transparent container with the same dimensions as a regular item
+    return Container(
+      width: imageSize, // Ensure the placeholder has a defined width to affect layout
+      height: imageSize + (screenHeight * 0.01) + fontSize, // Approximate height of image + sizedbox + text
+      color: Colors.transparent,
+    );
+  }
+
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      InkWell(
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        onTap: onTap,
+        child: Image.asset(
+          imagePath,
+          width: imageSize,
+          height: imageSize,
+          fit: BoxFit.fill,
+        ),
+      ),
+      SizedBox(height: screenHeight * 0.01),
+      Text(
+        title,
+        style: FlutterFlowTheme.of(context)
+            .bodyMedium
+            .override(
+          fontFamily: 'Poppins',
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ],
+  );
+}
+
+// 底部導航欄項目 - 根據方向使用尺寸比例
 Widget _buildBottomNavItem(
     BuildContext context,
     String imagePath,
     String label,
-    Size screenSize,
     {VoidCallback? onTap}
     ) {
-  return Padding(
-    padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+  final screenSize = MediaQuery.of(context).size;
+  final screenWidth = screenSize.width;
+  final screenHeight = screenSize.height;
+  final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+  // 根據方向設置不同的尺寸比例
+  final iconWidth = isLandscape
+      ? screenHeight * 0.08
+      : screenWidth * 0.15;
+  final iconHeight = isLandscape
+      ? screenHeight * 0.08
+      : screenWidth * 0.15;
+  final fontSize = isLandscape
+      ? screenHeight * 0.03
+      : screenWidth * 0.04;
+
+  return Expanded(
     child: InkWell(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
             imagePath,
-            width: screenSize.width * 0.17,
-            height: screenSize.width * 0.15,
+            width: iconWidth,
+            height: iconHeight,
             fit: BoxFit.contain,
           ),
-          SizedBox(height: 4),
+          SizedBox(height: screenHeight * 0.005),
           Text(
             label,
             style: FlutterFlowTheme.of(context).bodyMedium.override(
               fontFamily: 'Poppins',
-              fontSize: screenSize.width * 0.04,
+              fontSize: fontSize,
             ),
             textAlign: TextAlign.center,
           ),

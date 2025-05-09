@@ -25,41 +25,38 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   var money1;
 
-  Future money()async{
-    var url = Uri.parse(ip+"money.php");
-    final responce = await http.post(url,body: {
-      "account" : FFAppState().accountnumber,
+  Future money() async {
+    var url = Uri.parse(ip + "money.php");
+    final responce = await http.post(url, body: {
+      "account": FFAppState().accountnumber,
     });
     if (responce.statusCode == 200) {
       var data = json.decode(responce.body);
       setState(() {
-        money1=data['coin']['coin'];
+        money1 = data['coin']['coin'];
       });
       //print(data['coin']['coin']);
     }
   }
 
-  void cycle(){
-    var url = Uri.parse(ip+"delete.php");
-    http.post(url,body: {
-      "account":FFAppState().accountnumber,
+  void cycle() {
+    var url = Uri.parse(ip + "delete.php");
+    http.post(url, body: {
+      "account": FFAppState().accountnumber,
     });
-
   }
-
 
   @override
   void initState() {
-    future:money();
+    future:
+    money();
     super.initState();
     _model = createModel(context, () => HomeModel());
-
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     _unfocusNode.dispose();
     super.dispose();
   }
@@ -67,365 +64,411 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
-    //////////////////////////////////////////////////////////////////
     final screenSize = MediaQuery.of(context).size;
-/////////////////////////////////////////////////////////////////////////////////
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Header with greeting and points
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Text(
-                                'Hello ',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.07,/////////////////
-                                ),
-                              ),
-                              Text(
-                                FFAppState().nickname,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.05,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '繼續努力加油!!!',
-                            style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Poppins',
-                              fontSize: screenSize.width * 0.05,
-                            ),
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(0, 0, 20, 0),
-                                child: Image.asset(
-                                  'assets/images/25.jpg',
-                                  width: screenSize.width * 0.15,
-                                  height: screenSize.height * 0.08,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              Text(
-                                '$money1' + '個',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.1,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // 歡迎區域 - 改為水平佈局
+              _buildWelcomeHeader(context, screenSize, isLandscape),
 
-                // Main menu options
-                Container(
-                  width: screenSize.width,
-                  height: screenSize.height * 0.14,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFFD3C4),
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.pushNamed('need');
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Image.asset(
-                          'assets/images/23.png',
-                          width: screenSize.width * 0.22,
-                          height: double.infinity,
-                          fit: BoxFit.contain,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '需求表達',
-                                textAlign: TextAlign.start,
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              // 中間選單區域 (可滾動)
+              Expanded(
+                child: SingleChildScrollView(
+                  child: _buildMenuOptions(context, screenSize, isLandscape),
                 ),
+              ),
 
-                Container(
-                  width: screenSize.width,
-                  height: screenSize.height * 0.14,
-                  decoration: BoxDecoration(
-                    color: Color(0xFF688EEA),
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.pushNamed('train');
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Image.asset(
-                          'assets/images/22.png',
-                          width: screenSize.width * 0.22,
-                          height: double.infinity,
-                          fit: BoxFit.contain,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '復健訓練',
-                                textAlign: TextAlign.start,
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  width: screenSize.width,
-                  height: screenSize.height * 0.14,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFD4FFC4),
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.pushNamed('LINE');
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Image.asset(
-                          'assets/images/24.png',
-                          width: screenSize.width * 0.22,
-                          height: double.infinity,
-                          fit: BoxFit.contain,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '諮詢社群',
-                                textAlign: TextAlign.start,
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  width: screenSize.width,
-                  height: screenSize.height * 0.14,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).grayIcon,
-                  ),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () async {
-                      context.pushNamed('settings_menu');
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Image.asset(
-                          'assets/images/21.png',
-                          width: screenSize.width * 0.22,
-                          height: double.infinity,
-                          fit: BoxFit.contain,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(20, 0, 0, 0),
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                '設定',
-                                textAlign: TextAlign.start,
-                                style: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .override(
-                                  fontFamily: 'Poppins',
-                                  fontSize: screenSize.width * 0.15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Bottom navigation row
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/17.jpg',
-                            '返回',
-                            screenSize*1.5,
-                            onTap: () {
-                              Navigator.pop(context);
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/18.jpg',
-                            '使用紀錄',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('documental');
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/19.jpg',
-                            '新通知',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('notice');
-                            }
-                        ),
-                        _buildBottomNavItem(
-                            context,
-                            'assets/images/20.jpg',
-                            '關於',
-                            screenSize*1.5,
-                            onTap: () {
-                              context.pushNamed('about');
-                            }
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              // 底部導航欄
+              _buildBottomNavBar(context),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBottomNavItem(
+  // 重新設計的歡迎區域 - 水平佈局
+  Widget _buildWelcomeHeader(BuildContext context, Size screenSize, bool isLandscape) {
+    // 計算響應式尺寸
+    final headerPadding = EdgeInsets.symmetric(
+      horizontal: screenSize.width * 0.05,
+      vertical: isLandscape ? screenSize.height * 0.02 : screenSize.height * 0.02,
+    );
+
+    final greetingFontSize = isLandscape
+        ? screenSize.height * 0.05
+        : screenSize.width * 0.05;
+
+    final coinIconSize = isLandscape
+        ? screenSize.height * 0.08
+        : screenSize.width * 0.12;
+
+    final coinFontSize = isLandscape
+        ? screenSize.height * 0.05
+        : screenSize.width * 0.07;
+
+    return Container(
+      width: double.infinity,
+      padding: headerPadding,
+      decoration: BoxDecoration(
+        color: FlutterFlowTheme.of(context).primaryBtnText,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // 左側 - 歡迎詞
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Hello ',
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Poppins',
+                        fontSize: greetingFontSize,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      FFAppState().nickname,
+                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Poppins',
+                        fontSize: greetingFontSize,
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '繼續努力加油!!!',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                    fontFamily: 'Poppins',
+                    fontSize: greetingFontSize * 0.8,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 右側 - 金幣數量
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/25.jpg',
+                width: coinIconSize,
+                height: coinIconSize,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 8),
+              Text(
+                '$money1' + '個',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Poppins',
+                  fontSize: coinFontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFF9800),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 重新設計的選單區域
+  Widget _buildMenuOptions(BuildContext context, Size screenSize, bool isLandscape) {
+    // 響應式尺寸和間距計算
+    final padding = EdgeInsets.all(isLandscape
+        ? screenSize.width * 0.02
+        : screenSize.width * 0.03);
+
+    return Padding(
+      padding: padding,
+      child: isLandscape
+          ? _buildLandscapeMenuGrid(context, screenSize)
+          : _buildPortraitMenuList(context, screenSize),
+    );
+  }
+
+  // 橫向菜單 - 網格佈局
+  Widget _buildLandscapeMenuGrid(BuildContext context, Size screenSize) {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      childAspectRatio: 2.5,
+      mainAxisSpacing: screenSize.height * 0.02,
+      crossAxisSpacing: screenSize.width * 0.02,
+      children: [
+        _buildMenuOption(
+          context,
+          'assets/images/23.png',
+          '需求表達',
+          Color(0xFFFFD3C4),
+          screenSize,
+          true,
+          onTap: () => context.pushNamed('need'),
+        ),
+        _buildMenuOption(
+          context,
+          'assets/images/22.png',
+          '復健訓練',
+          Color(0xFF688EEA),
+          screenSize,
+          true,
+          onTap: () => context.pushNamed('train'),
+        ),
+        _buildMenuOption(
+          context,
+          'assets/images/24.png',
+          '諮詢社群',
+          Color(0xFFD4FFC4),
+          screenSize,
+          true,
+          onTap: () => context.pushNamed('LINE'),
+        ),
+        _buildMenuOption(
+          context,
+          'assets/images/21.png',
+          '設定',
+          FlutterFlowTheme.of(context).grayIcon,
+          screenSize,
+          true,
+          onTap: () => context.pushNamed('settings_menu'),
+        ),
+      ],
+    );
+  }
+
+  // 直向菜單 - 列表佈局
+  Widget _buildPortraitMenuList(BuildContext context, Size screenSize) {
+    final itemHeight = screenSize.height * 0.12;
+    final spacing = screenSize.height * 0.01;
+
+    return Column(
+      children: [
+        _buildMenuOption(
+          context,
+          'assets/images/23.png',
+          '需求表達',
+          Color(0xFFFFD3C4),
+          screenSize,
+          false,
+          height: itemHeight,
+          onTap: () => context.pushNamed('need'),
+        ),
+        SizedBox(height: spacing),
+        _buildMenuOption(
+          context,
+          'assets/images/22.png',
+          '復健訓練',
+          Color(0xFF688EEA),
+          screenSize,
+          false,
+          height: itemHeight,
+          onTap: () => context.pushNamed('train'),
+        ),
+        SizedBox(height: spacing),
+        _buildMenuOption(
+          context,
+          'assets/images/24.png',
+          '諮詢社群',
+          Color(0xFFD4FFC4),
+          screenSize,
+          false,
+          height: itemHeight,
+          onTap: () => context.pushNamed('LINE'),
+        ),
+        SizedBox(height: spacing),
+        _buildMenuOption(
+          context,
+          'assets/images/21.png',
+          '設定',
+          FlutterFlowTheme.of(context).grayIcon,
+          screenSize,
+          false,
+          height: itemHeight,
+          onTap: () => context.pushNamed('settings_menu'),
+        ),
+      ],
+    );
+  }
+
+  // 優化的選單選項
+  Widget _buildMenuOption(
       BuildContext context,
       String imagePath,
       String label,
+      Color backgroundColor,
       Size screenSize,
+      bool isLandscape,
+      {double? height, VoidCallback? onTap}
+      ) {
+    // 響應式尺寸計算
+    final iconSize = isLandscape
+        ? screenSize.height * 0.1
+        : screenSize.height * 0.08;
+
+    final fontSize = isLandscape
+        ? screenSize.height * 0.1
+        : screenSize.width * 0.08;
+
+    final borderRadius = BorderRadius.circular(12);
+
+    return Container(
+      width: double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: onTap,
+          child: Row(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: Image.asset(
+                  imagePath,
+                  width: iconSize,
+                  height: iconSize,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  label,
+                  style: FlutterFlowTheme.of(context).titleMedium.override(
+                    fontFamily: 'Poppins',
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 底部導航欄
+  Widget _buildBottomNavBar(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final navBarHeight = isLandscape
+        ? screenSize.height * 0.15
+        : screenSize.height * 0.15;
+
+    return Container(
+      width: double.infinity,
+      height: navBarHeight,
+      color: FlutterFlowTheme.of(context).primaryBtnText,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _buildNavItem(
+              context,
+              'assets/images/17.jpg',
+              '返回',
+              onTap: () => Navigator.pop(context)
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/18.jpg',
+              '使用紀錄',
+              onTap: () => context.pushNamed('documental')
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/19.jpg',
+              '新通知',
+              onTap: () => context.pushNamed('notice')
+          ),
+          _buildNavItem(
+              context,
+              'assets/images/20.jpg',
+              '關於',
+              onTap: () => context.pushNamed('about')
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 統一的導航項目
+  Widget _buildNavItem(
+      BuildContext context,
+      String imagePath,
+      String label,
       {VoidCallback? onTap}
       ) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final iconSize = isLandscape
+        ? screenSize.height * 0.08
+        : screenSize.width * 0.15;
+
+    final fontSize = isLandscape
+        ? screenSize.height * 0.03
+        : screenSize.width * 0.04;
+
+    return Expanded(
       child: InkWell(
         onTap: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               imagePath,
-              width: screenSize.width * 0.17,
-              height: screenSize.width * 0.15,
+              width: iconSize,
+              height: iconSize,
               fit: BoxFit.contain,
             ),
-            SizedBox(height: 4),
+            SizedBox(height: screenSize.height * 0.005),
             Text(
               label,
               style: FlutterFlowTheme.of(context).bodyMedium.override(
                 fontFamily: 'Poppins',
-                fontSize: screenSize.width * 0.04,
+                fontSize: fontSize,
               ),
               textAlign: TextAlign.center,
             ),

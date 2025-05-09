@@ -13,15 +13,6 @@ class FaceVideoApp extends StatefulWidget {
 class _VideoAppState extends State<FaceVideoApp> {
   late VideoPlayerController _controller;
 
-  final Map<int, String> rehabilitationInfo = {
-    9: "語言訓練：這個訓練幫助改善中風後語言功能障礙，通過有系統的語言練習促進語言區域恢復。",
-    10: "頭部轉動：這個運動可以鍛鍊頸部肌肉，改善頭部運動控制能力，對中風後頸部僵硬有幫助。",
-    11: "肩部活動：這個練習幫助恢復肩膀活動範圍，預防肩部疼痛和僵硬，提高上肢功能。",
-    12: "唾液腺按摩：這個技術通過刺激唾液腺，改善吞嚥功能和口腔濕潤度，減輕口乾症狀。",
-    13: "臉頰鼓氣：這個練習強化臉頰肌肉，改善口腔控制能力，有助於進食和發音功能恢復。",
-    14: "舌頭壓板訓練：這個訓練加強舌頭力量和控制能力，對吞嚥障礙和構音問題有改善效果。",
-  };
-
   @override
   void initState() {
     super.initState();
@@ -39,12 +30,17 @@ class _VideoAppState extends State<FaceVideoApp> {
       });
   }
 
-  // 添加到 _VideoAppState 類中
   void _showInfoDialog(BuildContext context) {
-    // 根據不同的 Face_Detect_Number 設置不同的復健信息
     String title = "";
     String description = "";
     String imagePath = "";
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final dialogWidth = isLandscape ? screenSize.width * 0.7 : screenSize.width * 0.9;
+    final dialogHeight = isLandscape ? screenSize.height * 0.8 : screenSize.height * 0.7;
+    final titleFontSize = isLandscape ? screenSize.height * 0.04 : screenSize.width * 0.06;
+    final descFontSize = isLandscape ? screenSize.height * 0.025 : screenSize.width * 0.04;
+    final imgMaxHeight = isLandscape ? screenSize.height * 0.3 : screenSize.height * 0.25;
 
     switch(Face_Detect_Number) {
       case 9:
@@ -91,8 +87,8 @@ class _VideoAppState extends State<FaceVideoApp> {
             borderRadius: BorderRadius.circular(20.0),
           ),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.7,
+            width: dialogWidth,
+            height: dialogHeight,
             padding: EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -100,11 +96,14 @@ class _VideoAppState extends State<FaceVideoApp> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     IconButton(
@@ -125,7 +124,7 @@ class _VideoAppState extends State<FaceVideoApp> {
                         Text(
                           description,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: descFontSize,
                             height: 1.5,
                           ),
                         ),
@@ -137,16 +136,20 @@ class _VideoAppState extends State<FaceVideoApp> {
                               Text(
                                 "訓練肌肉區域：",
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: descFontSize * 1.1, // Slightly larger than description
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(height: 10),
                               Center(
-                                child: Image.asset(
-                                  imagePath,
-                                  width: MediaQuery.of(context).size.width * 0.7,
-                                  fit: BoxFit.contain,
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: imgMaxHeight,
+                                  ),
+                                  child: Image.asset(
+                                    imagePath,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
                               ),
                             ],
@@ -165,151 +168,238 @@ class _VideoAppState extends State<FaceVideoApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final buttonSize = isLandscape ? screenSize.height * 0.14 : screenSize.width * 0.2;
+    final buttonIconSize = buttonSize * 0.6;
+    final instructionFontSize = isLandscape ? screenSize.height * 0.03 : screenSize.width * 0.05;
+    final appBarButtonSize = isLandscape ? screenSize.height * 0.08 : screenSize.width * 0.1;
 
-      appBar: Face_Detect_Number > 8 ? AppBar(
-        backgroundColor: Color.fromARGB(255, 144, 189, 249),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.info_outline, color: Colors.white, size: 30),
-            onPressed: () {
-              _showInfoDialog(context);
-            },
-          ),
-        ],
-      ) : null,
+    List<Widget> appBarActions = [];
+    if (Face_Detect_Number > 8) {
+      appBarActions.add(
+        IconButton(
+          icon: Icon(Icons.info_outline, color: Colors.white, size: appBarButtonSize * 0.7),
+          onPressed: () {
+            _showInfoDialog(context);
+          },
+        ),
+      );
+    }
 
-      body:Container(
-        color: Color.fromARGB(255, 144, 189, 249),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    final appBarWidget = AppBar(
+      backgroundColor: Color.fromARGB(255, 144, 189, 249),
+      elevation: 0,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.white, size: appBarButtonSize * 0.7),
+        onPressed: () => Navigator.of(context).pop(),
+      ),
+      title: Text(
+        "動作示範",
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: isLandscape ? screenSize.height * 0.05 : screenSize.width * 0.055
+        ),
+      ),
+      centerTitle: true,
+      actions: appBarActions,
+    );
+
+    Widget bodyContent;
+
+    if (isLandscape) {
+      bodyContent = Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _controller.value.isInitialized
-                ? AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller))
-                : Container(),
-            Padding(
-              padding: EdgeInsets.all(10),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-                      fixedSize: MaterialStateProperty.all(Size(80, 80)),
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100)))),
-                  onPressed: () {
-                    setState(() {
-                      _controller.value.isPlaying
-                          ? _controller.pause()
-                          : _controller.play();
-                    });
-                  },
-                  child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow, size: 50, color: Colors.white),
-                ),
-                Padding(padding: EdgeInsets.all(30)),
-                ElevatedButton(
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.amber),
-                      fixedSize: MaterialStateProperty.all<Size>(Size(80, 80)),
-                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(100)))),
-                  onPressed: () {
-                    switch(Face_Detect_Number){
-                      case 1:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>smile()));
-                        break;
-                      case 2:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>tougue()));
-                        break;
-                      case 3:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>pout()));
-                        break;
-                      case 4:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>open_mouth()));
-                        break;
-                      case 5:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>flick_tougue()));
-                        break;
-                      case 6:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>pursed_lips()));
-                        break;
-                      case 7:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>headneck_bend()));
-                        break;
-                      case 8:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>chin_movement()));
-                        break;
-                      case 9:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>speech()));
-                        break;
-                      case 10:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>head_turn()));
-                        break;
-                      case 11:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>Shoulder_activities()));
-                        break;
-                      case 12:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>Salivary_gland_massage()));
-                        break;
-                      case 13:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>puff()));
-                        break;
-                      case 14:
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context)=>tongue_depresser()));
-                        break;
-                    }
-                  },
-                  child: Icon(Icons.arrow_forward, size: 50, color: Colors.white),
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
+            // Left: Instruction Text
             Container(
-              width: 300,
-              padding: EdgeInsets.all(10),
-              alignment: Alignment.center,
+              width: screenSize.width * 0.22,
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
               decoration: BoxDecoration(
                 color: Color.fromARGB(132, 255, 255, 255),
-                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                borderRadius: BorderRadius.all(Radius.circular(15.0)),
               ),
               child: Text(
                 "左邊按鈕暫停與重播影片\n右邊按鈕開始復健!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  backgroundColor: Colors.transparent,
-                  fontSize: 25,
+                  fontSize: instructionFontSize,
                   color: Colors.black,
-                  height: 1.2,
-                  inherit: false,
+                  height: 1.3,
                 ),
+              ),
+            ),
+            // Center: Video Player
+            Container(
+              width: screenSize.width * 0.5, // Restrict video width
+              child: _controller.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller),
+                    )
+                  : Center(child: CircularProgressIndicator()),
+            ),
+            // Right: Buttons
+            Container(
+              width: screenSize.width * 0.20, // Width for buttons column
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        fixedSize: Size(buttonSize, buttonSize),
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _controller.value.isPlaying
+                            ? _controller.pause()
+                            : _controller.play();
+                      });
+                    },
+                    child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow, size: buttonIconSize, color: Colors.white),
+                  ),
+                  SizedBox(height: screenSize.height * 0.05), // Responsive spacing
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        fixedSize: Size(buttonSize, buttonSize),
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () {
+                      // Navigation logic remains the same
+                      switch(Face_Detect_Number){
+                        case 1: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>smile())); break;
+                        case 2: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>tougue())); break;
+                        case 3: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>pout())); break;
+                        case 4: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>open_mouth())); break;
+                        case 5: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>flick_tougue())); break;
+                        case 6: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>pursed_lips())); break;
+                        case 7: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>headneck_bend())); break;
+                        case 8: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>chin_movement())); break;
+                        case 9: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>speech())); break;
+                        case 10: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>head_turn())); break;
+                        case 11: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Shoulder_activities())); break;
+                        case 12: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Salivary_gland_massage())); break;
+                        case 13: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>puff())); break;
+                        case 14: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>tongue_depresser())); break;
+                      }
+                    },
+                    child: Icon(Icons.arrow_forward, size: buttonIconSize, color: Colors.white),
+                  ),
+                ],
               ),
             ),
           ],
         ),
+      );
+    } else {
+      // Portrait layout (original structure with slight adjustments for consistency if any)
+      bodyContent = Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (_controller.value.isInitialized)
+                Container(
+                  width: double.infinity, // Portrait takes full width
+                  child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: VideoPlayer(_controller)
+                  ),
+                )
+              else
+                CircularProgressIndicator(),
+              SizedBox(height: 15), // Original: isLandscape ? 20 : 15
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        fixedSize: Size(buttonSize, buttonSize),
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _controller.value.isPlaying
+                            ? _controller.pause()
+                            : _controller.play();
+                      });
+                    },
+                    child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow, size: buttonIconSize, color: Colors.white),
+                  ),
+                  SizedBox(width: 30), // Original: isLandscape ? 40 : 30
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        fixedSize: Size(buttonSize, buttonSize),
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.zero,
+                    ),
+                    onPressed: () {
+                      // Navigation logic remains the same
+                      switch(Face_Detect_Number){
+                        case 1: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>smile())); break;
+                        case 2: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>tougue())); break;
+                        case 3: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>pout())); break;
+                        case 4: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>open_mouth())); break;
+                        case 5: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>flick_tougue())); break;
+                        case 6: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>pursed_lips())); break;
+                        case 7: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>headneck_bend())); break;
+                        case 8: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>chin_movement())); break;
+                        case 9: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>speech())); break;
+                        case 10: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>head_turn())); break;
+                        case 11: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Shoulder_activities())); break;
+                        case 12: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Salivary_gland_massage())); break;
+                        case 13: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>puff())); break;
+                        case 14: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>tongue_depresser())); break;
+                      }
+                    },
+                    child: Icon(Icons.arrow_forward, size: buttonIconSize, color: Colors.white),
+                  ),
+                ],
+              ),
+              SizedBox(height: 15), // Original: isLandscape ? 20 : 15
+              Container(
+                width: screenSize.width * 0.8, // Original: isLandscape ? screenSize.width * 0.5 : screenSize.width * 0.8,
+                padding: EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(132, 255, 255, 255),
+                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                ),
+                child: Text(
+                  "左邊按鈕暫停與重播影片\n右邊按鈕開始復健!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: instructionFontSize,
+                    color: Colors.black,
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: appBarWidget,
+      body: Container(
+        color: Color.fromARGB(255, 144, 189, 249),
+        padding: EdgeInsets.all(isLandscape ? screenSize.width * 0.025 : 16.0), 
+        child: bodyContent,
       ),
     );
-
   }
 
   @override

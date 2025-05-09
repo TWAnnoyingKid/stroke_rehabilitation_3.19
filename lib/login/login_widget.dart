@@ -14,6 +14,7 @@ export 'login_model.dart';
 import 'package:http/http.dart' as http;
 import '/main.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 class LoginWidget extends StatefulWidget {
   const LoginWidget({Key? key}) : super(key: key);
 
@@ -139,6 +140,8 @@ class _LoginWidgetState extends State<LoginWidget> {
     context.watch<FFAppState>();
     final screenSize = MediaQuery.of(context).size;
     final screenHeight = screenSize.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
@@ -156,7 +159,400 @@ class _LoginWidgetState extends State<LoginWidget> {
                   constraints: BoxConstraints(
                     minHeight: screenHeight * 0.9,
                   ),
-                  child: Column(
+                  child: isLandscape
+                  // 橫向模式布局
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // 左側標題區域
+                      Expanded(
+                        flex: 4,
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(20.0, 0, 20.0, 0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                '歡迎使用',
+                                textAlign: TextAlign.center,
+                                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                  fontFamily: 'Poppins',
+                                  fontSize: screenHeight * 0.07,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                child: Text(
+                                  '整合復健APP使用登入',
+                                  textAlign: TextAlign.center,
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Poppins',
+                                    fontSize: screenHeight * 0.04,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                child: Text(
+                                  '(高醫X花慈X高科大)',
+                                  textAlign: TextAlign.center,
+                                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                    fontFamily: 'Poppins',
+                                    fontSize: screenHeight * 0.04,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // 右側表單區域
+                      Expanded(
+                        flex: 6,
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(10.0, 0.0, 20.0, 0.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 帳號輸入區域
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Text(
+                                      '帳號 :',
+                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        fontFamily: 'Poppins',
+                                        fontSize: screenHeight * 0.04,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(5.0, 0.0, 0.0, 0.0),
+                                        child: Container(
+                                          height: screenHeight * 0.08,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 5.0,
+                                                color: Color(0x4D101213),
+                                                offset: Offset(3.0, 8.0),
+                                              )
+                                            ],
+                                            borderRadius: BorderRadius.circular(30.0),
+                                          ),
+                                          child: Container(
+                                            width: 190.0,
+                                            child: Autocomplete<String>(
+                                              initialValue: TextEditingValue(text: FFAppState().accountnumber),
+                                              optionsBuilder: (textEditingValue) {
+                                                if (textEditingValue.text == '') {
+                                                  return const Iterable<String>.empty();
+                                                }
+                                                return ['airehab_'].where((option) {
+                                                  final lowercaseOption = option.toLowerCase();
+                                                  return lowercaseOption.contains(
+                                                      textEditingValue.text.toLowerCase());
+                                                });
+                                              },
+                                              optionsViewBuilder: (context, onSelected, options) {
+                                                return AutocompleteOptionsList(
+                                                  textFieldKey: _model.textFieldKey1,
+                                                  textController: _model.textController1!,
+                                                  options: options.toList(),
+                                                  onSelected: onSelected,
+                                                  textStyle: FlutterFlowTheme.of(context).bodyMedium,
+                                                  textHighlightStyle: TextStyle(),
+                                                  elevation: 4.0,
+                                                  optionBackgroundColor:
+                                                  FlutterFlowTheme.of(context).primaryBackground,
+                                                  optionHighlightColor:
+                                                  FlutterFlowTheme.of(context).secondaryBackground,
+                                                  maxHeight: 200.0,
+                                                );
+                                              },
+                                              onSelected: (String selection) {
+                                                setState(() =>
+                                                _model.textFieldSelectedOption1 = selection);
+                                                FocusScope.of(context).unfocus();
+                                              },
+                                              fieldViewBuilder: (
+                                                  context,
+                                                  textEditingController,
+                                                  focusNode,
+                                                  onEditingComplete,
+                                                  ) {
+                                                _model.textController1 = textEditingController;
+                                                return TextFormField(
+                                                  key: _model.textFieldKey1,
+                                                  controller: textEditingController,
+                                                  focusNode: focusNode,
+                                                  onEditingComplete: onEditingComplete,
+                                                  onChanged: (_) => EasyDebounce.debounce(
+                                                    '_model.textController1',
+                                                    Duration(milliseconds: 2000),
+                                                        () => setState(() {}),
+                                                  ),
+                                                  onFieldSubmitted: (_) async {
+                                                    setState(() {
+                                                      FFAppState().accountnumber =
+                                                          _model.textController1.text;
+                                                    });
+                                                  },
+                                                  obscureText: false,
+                                                  decoration: InputDecoration(
+                                                    hintStyle:
+                                                    FlutterFlowTheme.of(context).bodySmall.override(
+                                                      fontFamily: 'Poppins',
+                                                      fontSize: screenHeight * 0.035,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                    enabledBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius: const BorderRadius.only(
+                                                        topLeft: Radius.circular(4.0),
+                                                        topRight: Radius.circular(4.0),
+                                                      ),
+                                                    ),
+                                                    focusedBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius: const BorderRadius.only(
+                                                        topLeft: Radius.circular(4.0),
+                                                        topRight: Radius.circular(4.0),
+                                                      ),
+                                                    ),
+                                                    errorBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius: const BorderRadius.only(
+                                                        topLeft: Radius.circular(4.0),
+                                                        topRight: Radius.circular(4.0),
+                                                      ),
+                                                    ),
+                                                    focusedErrorBorder: UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                        color: Color(0x00000000),
+                                                        width: 1.0,
+                                                      ),
+                                                      borderRadius: const BorderRadius.only(
+                                                        topLeft: Radius.circular(4.0),
+                                                        topRight: Radius.circular(4.0),
+                                                      ),
+                                                    ),
+                                                    suffixIcon: _model.textController1!.text.isNotEmpty
+                                                        ? InkWell(
+                                                      onTap: () async {
+                                                        _model.textController1?.clear();
+                                                        setState(() {});
+                                                      },
+                                                      child: Icon(
+                                                        Icons.clear,
+                                                        color: Color(0xFF757575),
+                                                        size: 24.0,
+                                                      ),
+                                                    )
+                                                        : null,
+                                                  ),
+                                                  style: FlutterFlowTheme.of(context)
+                                                      .titleMedium
+                                                      .override(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: screenHeight * 0.035,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                  validator: _model.textController1Validator
+                                                      .asValidator(context),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // 密碼輸入區域
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 10.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Text(
+                                      '密碼 :',
+                                      style: FlutterFlowTheme.of(context).bodyMedium.override(
+                                        fontFamily: 'Poppins',
+                                        fontSize: screenHeight * 0.04,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(5.0, 0.0, 0.0, 0.0),
+                                        child: Container(
+                                          height: screenHeight * 0.08,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context).secondaryBackground,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                blurRadius: 5.0,
+                                                color: Color(0x4D101213),
+                                                offset: Offset(3.0, 8.0),
+                                              )
+                                            ],
+                                            borderRadius: BorderRadius.circular(30.0),
+                                          ),
+                                          child: Container(
+                                            width: 190.0,
+                                            child: TextFormField(
+                                              controller: _model.textController2,
+                                              onFieldSubmitted: (_) async {
+                                                setState(() {
+                                                  FFAppState().password =
+                                                      _model.textController2.text;
+                                                });
+                                              },
+                                              obscureText: !_model.passwordVisibility,
+                                              decoration: InputDecoration(
+                                                hintStyle:
+                                                FlutterFlowTheme.of(context).bodySmall.override(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: screenHeight * 0.035,
+                                                ),
+                                                enabledBorder: UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x00000000),
+                                                    width: 1.0,
+                                                  ),
+                                                  borderRadius: const BorderRadius.only(
+                                                    topLeft: Radius.circular(4.0),
+                                                    topRight: Radius.circular(4.0),
+                                                  ),
+                                                ),
+                                                focusedBorder: UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x00000000),
+                                                    width: 1.0,
+                                                  ),
+                                                  borderRadius: const BorderRadius.only(
+                                                    topLeft: Radius.circular(4.0),
+                                                    topRight: Radius.circular(4.0),
+                                                  ),
+                                                ),
+                                                errorBorder: UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x00000000),
+                                                    width: 1.0,
+                                                  ),
+                                                  borderRadius: const BorderRadius.only(
+                                                    topLeft: Radius.circular(4.0),
+                                                    topRight: Radius.circular(4.0),
+                                                  ),
+                                                ),
+                                                focusedErrorBorder: UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                    color: Color(0x00000000),
+                                                    width: 1.0,
+                                                  ),
+                                                  borderRadius: const BorderRadius.only(
+                                                    topLeft: Radius.circular(4.0),
+                                                    topRight: Radius.circular(4.0),
+                                                  ),
+                                                ),
+                                                suffixIcon: InkWell(
+                                                  onTap: () => setState(
+                                                        () => _model.passwordVisibility =
+                                                    !_model.passwordVisibility,
+                                                  ),
+                                                  focusNode: FocusNode(skipTraversal: true),
+                                                  child: Icon(
+                                                    _model.passwordVisibility
+                                                        ? Icons.visibility_outlined
+                                                        : Icons.visibility_off_outlined,
+                                                    color: Color(0xFF757575),
+                                                    size: 24.0,
+                                                  ),
+                                                ),
+                                              ),
+                                              style: FlutterFlowTheme.of(context)
+                                                  .titleMedium
+                                                  .override(
+                                                fontFamily: 'Poppins',
+                                                fontSize: screenHeight * 0.035,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              validator: _model.textController2Validator
+                                                  .asValidator(context),
+                                              inputFormatters: [_model.textFieldMask2],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // 登入按鈕
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(0.0, 10.0, 0.0, 0.0),
+                                child: FFButtonWidget(
+                                  onPressed: () async {
+                                    getData();
+                                    FFAppState().accountnumber = _model.textController1.text;
+                                    FFAppState().password = _model.textController2.text;
+                                  },
+                                  text: '登入',
+                                  options: FFButtonOptions(
+                                    width: 150.0,
+                                    height: 50.0,
+                                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                    iconPadding:
+                                    EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                                    color: Color(0xFFFBC9C9),
+                                    textStyle:
+                                    FlutterFlowTheme.of(context).titleMedium.override(
+                                      fontFamily: 'Poppins',
+                                      color: FlutterFlowTheme.of(context).black600,
+                                      fontSize: screenHeight * 0.035,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    elevation: 2.0,
+                                    borderSide: BorderSide(
+                                      color: FlutterFlowTheme.of(context).black600,
+                                      width: 3.0,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                  // 直向模式保持不變
+                      : Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -246,15 +642,15 @@ class _LoginWidgetState extends State<LoginWidget> {
                                               text: FFAppState().accountnumber),
                                           optionsBuilder: (textEditingValue) {
                                             if (textEditingValue.text == '') {
-                                              return const Iterable<
-                                                  String>.empty();
+                                              return const Iterable
+                                              <String>.empty();
                                             }
                                             return ['airehab_'].where((option) {
-                                              final lowercaseOption =
-                                              option.toLowerCase();
-                                              return lowercaseOption.contains(
-                                                  textEditingValue.text
-                                                      .toLowerCase());
+                                            final lowercaseOption =
+                                            option.toLowerCase();
+                                            return lowercaseOption.contains(
+                                            textEditingValue.text
+                                                .toLowerCase());
                                             });
                                           },
                                           optionsViewBuilder:

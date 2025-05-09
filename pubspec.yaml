@@ -105,7 +105,6 @@ flutter:
     - assets/fonts/
     - assets/images/
     - assets/videos/
-#    - assets/face_videos/
     - assets/audios/
     - assets/lottie_animations/
     - assets/rive_animations/
@@ -119,7 +118,7 @@ flutter:
     - assets/taigi_pose_audios/lower/
     - assets/taigi_pose_audios/
     - assets/ml/
-    - assets/model/
+#    - assets/model/
     - assets/model/rsst_integrated_2k2_cnn_att2_2_ir9.onnx
 
 flutter_icons:

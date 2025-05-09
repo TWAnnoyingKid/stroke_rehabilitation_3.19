@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'about_model.dart';
 export 'about_model.dart';
+import 'package:go_router/go_router.dart';
 
 class AboutWidget extends StatefulWidget {
   const AboutWidget({Key? key}) : super(key: key);
@@ -38,477 +39,312 @@ class _AboutWidgetState extends State<AboutWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
     final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final titleFontSize = isLandscape ? screenHeight * 0.07 : screenWidth * 0.08;
+    final contentFontSize = isLandscape ? screenHeight * 0.04 : screenWidth * 0.05;
+    final smallContentFontSize = isLandscape ? screenHeight * 0.035 : screenWidth * 0.04;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).requestFocus(_unfocusNode),
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBtnText,
+        backgroundColor: Color(0xFF90BDF9), // Consistent background color
         body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: screenSize.width,
-                  decoration: BoxDecoration(
-                    color: FlutterFlowTheme.of(context).secondaryBackground,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 1.0,
-                        height: MediaQuery.of(context).size.height * 0.8,
-                        decoration: BoxDecoration(
-                          color: FlutterFlowTheme.of(context).secondaryBackground,
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Stack(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Fixed Header Area
+              Container(
+                width: double.infinity,
+                height: isLandscape ? screenHeight * 0.15 : screenHeight * 0.1,
+                color: Color(0xFF90BDF9),
+                padding: EdgeInsets.symmetric(
+                    vertical: isLandscape ? screenHeight * 0.01 : screenHeight * 0.01),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '關於',
+                      textAlign: TextAlign.center,
+                      style: FlutterFlowTheme.of(context)
+                          .displaySmall
+                          .override(
+                        fontFamily: 'Poppins',
+                        fontSize: titleFontSize,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Scrollable Content Area
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.all(isLandscape ? screenWidth * 0.03 : screenWidth * 0.04),
+                    child: Container(
+                      width:double.infinity,
+                      decoration: BoxDecoration(
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        boxShadow: [
+                          BoxShadow(
+                            blurRadius: 4.0,
+                            color: Color(0x5B000000),
+                            offset: Offset(0.0, -2.0),
+                          )
+                        ],
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '發展及合作單位:',
+                              style: FlutterFlowTheme.of(context)
+                                  .displaySmall
+                                  .override(
+                                fontFamily: 'Poppins',
+                                fontSize: contentFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE0E7F0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 4.0,
+                                    color: Color(0x33000000),
+                                    offset: Offset(3.0, 10.0),
+                                  )
+                                ],
+                                borderRadius:
+                                BorderRadius.circular(10.0),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    width:
-                                    MediaQuery.of(context).size.width * 1.0,
-                                    height: 220.0,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF6EBAFF),
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          20.0, 35.0, 20.0, 0.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 8.0, 0.0, 0.0),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  '關於',
-                                                  textAlign: TextAlign.start,
-                                                  style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineMedium
-                                                      .override(
-                                                    fontFamily: 'Poppins',
-                                                    color: FlutterFlowTheme
-                                                        .of(context)
-                                                        .black600,
-                                                    fontSize: 45.0,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                  Text(
+                                    '高雄醫學大學',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                      fontFamily: 'Poppins',
+                                      fontSize: smallContentFontSize,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 190.0, 0.0, 0.0),
-                                    child: Container(
-                                      width:
-                                      MediaQuery.of(context).size.width * 1.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryBackground,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            blurRadius: 4.0,
-                                            color: Color(0x5B000000),
-                                            offset: Offset(0.0, -2.0),
-                                          )
-                                        ],
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(0.0),
-                                          bottomRight: Radius.circular(0.0),
-                                          topLeft: Radius.circular(20.0),
-                                          topRight: Radius.circular(20.0),
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 165.0, 0.0),
-                                            child: AutoSizeText(
-                                              '發展及合作單位:',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .displaySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 26.0,
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                16.0, 12.0, 16.0, 10.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xFFE0E7F0),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    blurRadius: 4.0,
-                                                    color: Color(0x33000000),
-                                                    offset: Offset(3.0, 10.0),
-                                                  )
-                                                ],
-                                                borderRadius:
-                                                BorderRadius.circular(10.0),
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                    0.0, 0.0, 0.0, 10.0),
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(8.0, 0.0,
-                                                          0.0, 5.0),
-                                                      child: Text(
-                                                        '高雄醫學大學',
-                                                        textAlign:
-                                                        TextAlign.start,
-                                                        style:
-                                                        FlutterFlowTheme.of(
-                                                            context)
-                                                            .bodyMedium
-                                                            .override(
-                                                          fontFamily:
-                                                          'Poppins',
-                                                          fontSize: 25.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(8.0, 0.0,
-                                                          0.0, 5.0),
-                                                      child: Text(
-                                                        '花蓮慈濟醫院',
-                                                        textAlign:
-                                                        TextAlign.start,
-                                                        style:
-                                                        FlutterFlowTheme.of(
-                                                            context)
-                                                            .bodyMedium
-                                                            .override(
-                                                          fontFamily:
-                                                          'Poppins',
-                                                          fontSize: 25.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(8.0, 0.0,
-                                                          0.0, 0.0),
-                                                      child: Text(
-                                                        '國立高雄科技大學',
-                                                        textAlign:
-                                                        TextAlign.start,
-                                                        style:
-                                                        FlutterFlowTheme.of(
-                                                            context)
-                                                            .bodyMedium
-                                                            .override(
-                                                          fontFamily:
-                                                          'Poppins',
-                                                          fontSize: 25.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 185.0, 0.0),
-                                            child: AutoSizeText(
-                                              'APP 使用方式:',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .displaySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 26.0,
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                16.0, 12.0, 16.0, 10.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xFFE0E7F0),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    blurRadius: 4.0,
-                                                    color: Color(0x33000000),
-                                                    offset: Offset(3.0, 10.0),
-                                                  )
-                                                ],
-                                                borderRadius:
-                                                BorderRadius.circular(10.0),
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(
-                                                    0.0, 0.0, 0.0, 10.0),
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(8.0, 0.0,
-                                                          0.0, 0.0),
-                                                      child: Text(
-                                                        '暫定',
-                                                        textAlign:
-                                                        TextAlign.start,
-                                                        style:
-                                                        FlutterFlowTheme.of(
-                                                            context)
-                                                            .bodyMedium
-                                                            .override(
-                                                          fontFamily:
-                                                          'Poppins',
-                                                          fontSize: 25.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                0.0, 0.0, 185.0, 0.0),
-                                            child: AutoSizeText(
-                                              '最後更新時間:',
-                                              style: FlutterFlowTheme.of(context)
-                                                  .displaySmall
-                                                  .override(
-                                                fontFamily: 'Poppins',
-                                                fontSize: 26.0,
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                16.0, 12.0, 16.0, 0.0),
-                                            child: Container(
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                color: Color(0xFFE0E7F0),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    blurRadius: 4.0,
-                                                    color: Color(0x33000000),
-                                                    offset: Offset(3.0, 10.0),
-                                                  )
-                                                ],
-                                                borderRadius:
-                                                BorderRadius.circular(10.0),
-                                              ),
-                                              child: Padding(
-                                                padding: EdgeInsetsDirectional
-                                                    .fromSTEB(0.0, 0.0, 0.0, 2.0),
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize.max,
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding:
-                                                      EdgeInsetsDirectional
-                                                          .fromSTEB(8.0, 0.0,
-                                                          0.0, 0.0),
-                                                      child: Text(
-                                                        '2023/3/27',
-                                                        textAlign:
-                                                        TextAlign.start,
-                                                        style:
-                                                        FlutterFlowTheme.of(
-                                                            context)
-                                                            .bodyMedium
-                                                            .override(
-                                                          fontFamily:
-                                                          'Poppins',
-                                                          fontSize: 25.0,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height:20),
-                                          Container(
-                                            width: 200,
-                                            height: 100,
-                                            decoration: BoxDecoration(
-                                              color: FlutterFlowTheme.of(context).secondaryBackground,
-                                              borderRadius: BorderRadius.circular(0),
-                                              shape: BoxShape.rectangle,
-                                            ),
-                                            child: InkWell(
-                                              splashColor: Colors.transparent,
-                                              focusColor: Colors.transparent,
-                                              hoverColor: Colors.transparent,
-                                              highlightColor: Colors.transparent,
-                                              onTap: () async {
-                                                await launchURL(
-                                                    'https://drive.google.com/drive/folders/1Suaj2T_KFVLwX32sacGBKUb-evTJcy1p?usp=drive_link');
-                                              },
-                                              child: Text(
-                                                '醫療行為參考資料請按這',
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '花蓮慈濟醫院',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                      fontFamily: 'Poppins',
+                                      fontSize: smallContentFontSize,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    '國立高雄科技大學',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                      fontFamily: 'Poppins',
+                                      fontSize: smallContentFontSize,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'APP 使用方式:',
+                              style: FlutterFlowTheme.of(context)
+                                  .displaySmall
+                                  .override(
+                                fontFamily: 'Poppins',
+                                fontSize: contentFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE0E7F0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 4.0,
+                                    color: Color(0x33000000),
+                                    offset: Offset(3.0, 10.0),
+                                  )
+                                ],
+                                borderRadius:
+                                BorderRadius.circular(10.0),
+                              ),
+                              child: Text(
+                                '暫定',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                  fontFamily: 'Poppins',
+                                  fontSize: smallContentFontSize,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              '最後更新時間:',
+                              style: FlutterFlowTheme.of(context)
+                                  .displaySmall
+                                  .override(
+                                fontFamily: 'Poppins',
+                                fontSize: contentFontSize,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.all(12.0),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFE0E7F0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 4.0,
+                                    color: Color(0x33000000),
+                                    offset: Offset(3.0, 10.0),
+                                  )
+                                ],
+                                borderRadius:
+                                BorderRadius.circular(10.0),
+                              ),
+                              child: Text(
+                                '2023/3/27',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                  fontFamily: 'Poppins',
+                                  fontSize: smallContentFontSize,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Center(
+                              child: Container(
+                                width: isLandscape ? screenWidth * 0.4 : screenWidth * 0.6,
+                                height: isLandscape ? screenHeight * 0.1 : screenHeight * 0.06,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                     await launchURL(
+                                         'https://drive.google.com/drive/folders/1Suaj2T_KFVLwX32sacGBKUb-evTJcy1p?usp=drive_link');
+                                  },
+                                  child: Text(
+                                    '醫療行為參考資料請按這',
+                                     style: TextStyle(fontSize: smallContentFontSize, color: Colors.white),
+                                     textAlign: TextAlign.center,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFF6EBAFF), // Button color
+                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                    textStyle: TextStyle(
+                                      fontSize: smallContentFontSize,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                       borderRadius: BorderRadius.circular(10.0)
+                                    )
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 10, 0, 18),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/17.jpg',
-                                  '返回',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/18.jpg',
-                                  '使用紀錄',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('documental');
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/19.jpg',
-                                  '新通知',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('notice');
-                                  }
-                              ),
-                              _buildBottomNavItem(
-                                  context,
-                                  'assets/images/20.jpg',
-                                  '關於',
-                                  screenSize*1.5,
-                                  onTap: () {
-                                    context.pushNamed('about');
-                                  }
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-
-              ],
-            ),
+              ),
+              // Fixed Bottom Navigation Bar
+              Container(
+                width: double.infinity,
+                height: isLandscape ? screenHeight * 0.18 : screenHeight * 0.15,
+                color: FlutterFlowTheme.of(context).primaryBtnText,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildBottomNavItem(context, 'assets/images/17.jpg', '返回',
+                        onTap: () => context.pushNamed('home')),
+                    _buildBottomNavItem(context, 'assets/images/18.jpg', '使用紀錄',
+                        onTap: () => context.pushNamed('documental')),
+                    _buildBottomNavItem(context, 'assets/images/19.jpg', '新通知',
+                        onTap: () => context.pushNamed('notice')),
+                    _buildBottomNavItem(context, 'assets/images/20.jpg', '關於',
+                        onTap: () => context.pushNamed('about')),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-  Widget _buildBottomNavItem(
-      BuildContext context,
-      String imagePath,
-      String label,
-      Size screenSize,
-      {VoidCallback? onTap}
-      ) {
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              imagePath,
-              width: screenSize.width * 0.17,
-              height: screenSize.width * 0.15,
-              fit: BoxFit.contain,
-            ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Poppins',
-                fontSize: screenSize.width * 0.04,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+}
+
+Widget _buildBottomNavItem(
+    BuildContext context,
+    String imagePath,
+    String label,
+    {VoidCallback? onTap}
+    ) {
+  final screenSize = MediaQuery.of(context).size;
+  final screenWidth = screenSize.width;
+  final screenHeight = screenSize.height;
+  final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+  final iconWidth = isLandscape ? screenHeight * 0.08 : screenWidth * 0.12;
+  final iconHeight = isLandscape ? screenHeight * 0.08 : screenWidth * 0.12;
+  final fontSize = isLandscape ? screenHeight * 0.03 : screenWidth * 0.04;
+
+  return Expanded(
+    child: InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            width: iconWidth,
+            height: iconHeight,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(height: screenHeight * 0.005),
+          Text(
+            label,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Poppins',
+                  fontSize: fontSize,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
