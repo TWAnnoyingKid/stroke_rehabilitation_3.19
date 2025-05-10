@@ -276,7 +276,7 @@ class PosePainter extends CustomPainter {
             pose.landmarks[PoseLandmarkType.rightThumb]?.z,//44,45
             pose.landmarks[PoseLandmarkType.nose]?.z
           ];
-      }
+      } 
 
       posetrust=[
         pose.landmarks[PoseLandmarkType.nose]?.likelihood,

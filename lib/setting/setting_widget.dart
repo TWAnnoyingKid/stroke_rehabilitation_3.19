@@ -757,7 +757,7 @@ class _SettingWidgetState extends State<SettingWidget> {
               color: Colors.black,
               fontSize: valueFontSize,
             ),
-            hintText: '請做選擇',
+            hintText: ' 請做選擇',
             icon: Icon(Icons.keyboard_arrow_down_rounded, color: FlutterFlowTheme.of(context).secondaryText, size: valueFontSize * 1.2),
             fillColor: FlutterFlowTheme.of(context).primaryBackground,
             elevation: 2.0,
