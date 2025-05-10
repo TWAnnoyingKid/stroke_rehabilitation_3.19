@@ -220,7 +220,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       childAspectRatio: 2.5,
-      mainAxisSpacing: screenSize.height * 0.02,
+      mainAxisSpacing: screenSize.height * 0.03,
       crossAxisSpacing: screenSize.width * 0.02,
       children: [
         _buildMenuOption(

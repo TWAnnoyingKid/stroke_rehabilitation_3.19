@@ -186,7 +186,7 @@ class _NeedWidgetState extends State<NeedWidget> {
           _buildGridItem(
             context,
             'assets/images/11.png',
-            '腹痛身',
+            '腹痛',
             screenSize,
             isLandscape,
             onTap: () async {
@@ -228,11 +228,11 @@ class _NeedWidgetState extends State<NeedWidget> {
       {required VoidCallback onTap}
       ) {
     final imageSize = isLandscape
-        ? screenSize.height * 0.15
-        : screenSize.width * 0.25;
+        ? screenSize.height * 0.30
+        : screenSize.width * 0.35;
 
     final fontSize = isLandscape
-        ? screenSize.height * 0.03
+        ? screenSize.height * 0.05
         : screenSize.width * 0.05;
 
     return Column(
